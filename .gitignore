@@ -1,5 +1,7 @@
 # Compiled class file
 *.class
+.classpath
+bin/
 
 # Log file
 *.log
@@ -23,8 +25,9 @@
 hs_err_pid*
 replay_pid*
 
+# OS files
 .DS_Store
-.classpath
+
+# Other Java files
 .project
 .settings/
-bin/
