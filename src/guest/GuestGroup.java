@@ -2,6 +2,11 @@ package guest;
 
 import java.util.ArrayList;
 
+/**
+ * 
+ * @author ryanrockey, 
+ *
+ */
 public class GuestGroup {
 	// the guests that belong to this group
 	private ArrayList<Guest> guests;

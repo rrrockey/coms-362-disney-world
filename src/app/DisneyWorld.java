@@ -1,6 +1,19 @@
 package app;
 
+/**
+ * 
+ * @author ryanrockey
+ *
+ */
 public class DisneyWorld {
+	
+	/**
+	 * 
+	 */
+	private static void checkInGuest() {
+		
+	}
+	
 	public static void main(String args[]) {
 		System.out.println("              .=-.-.  ,-,--.  .-._           ,----.                 \n"
 				+ "  _,..---._  /==/_ /,-.'-  _\\/==/ \\  .-._ ,-.--` , \\ ,--.-.  .-,--. \n"
@@ -21,6 +34,7 @@ public class DisneyWorld {
 				+ "  |-  /\\ /==/   '.='. -   .' /==/  /\\ ,  )==/ - , ,/==|-,   _`/     \n"
 				+ "  `--`  `--`      `--`--''   `--`-`--`--'`--`-----'`-.`.____.'      \n");
 		
+		/*these can obviously be changed before Friday, just wanted a start for the interface*/
 		System.out.println("    +--------------------------------------------------+\n"
 				+ "    |                                                  |\n"
 				+ "    |  1) Check-in Guest / Party                       |\n"

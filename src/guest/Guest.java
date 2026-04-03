@@ -1,5 +1,10 @@
 package guest;
 
+/**
+ * 
+ * @author ryanrockey, 
+ *
+ */
 public class Guest {
 	public String name;
 	
