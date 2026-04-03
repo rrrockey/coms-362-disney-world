@@ -13,7 +13,13 @@ public class GuestGroup {
 	public String groupName;
 	
 	public GuestGroup(Guest manager, String groupName) {
-		this.manager = manager;
+		try {
+			this.manager = manager;
+			addGuest(manager);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	// adds the specified guest from the guestGroup
