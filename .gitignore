@@ -31,3 +31,4 @@ replay_pid*
 # Other Java files
 .project
 .settings/
+data/
