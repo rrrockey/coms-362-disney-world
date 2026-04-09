@@ -45,13 +45,14 @@ public class DisneyWorld {
 	        switch (command) {
 	            case "1" -> CheckInGuests.checkInGuests();
 	            case "2" -> ViewGuests.viewGuests();
-	            case "3" -> System.out.println("[stub] Book Lightning Lane / Reservation");
-	            case "4" -> System.out.println("[stub] Manage Dining Orders");
-	            case "5" -> processRetailSales();
-	            case "6" -> System.out.println("[stub] View Park Stats / Reports");
-	            case "7" -> System.out.println("[stub] Transportation / Shuttle Info");
-	            case "0" -> System.out.println("Goodbye!");
+	            case "3" -> processRetailSales();
+	            case "4" -> System.out.println("[stub] Manage Restaurants");
+	            case "5" -> System.out.println("[stub] Manage Concessions");
+	            case "6" -> System.out.println("[stub] Manage Hotels");
+	            case "7" -> System.out.println("[stub] Manage Park Events");
+	            case "0" -> {System.out.println("Goodbye!"); break;}
 	            default  -> System.out.println("Invalid command. Please enter 0-7.");
+
 	        }
         }
     }
@@ -65,7 +66,7 @@ public class DisneyWorld {
     }
 
     // ------------------------------------------------------------------ //
-    //  Menu option 5: Retail Sales Simulation
+    //  Menu option 3: Retail Sales Simulation
     // ------------------------------------------------------------------ //
 
     private static void processRetailSales() {
@@ -216,11 +217,11 @@ public class DisneyWorld {
           + " |                                                  |\n"
           + " | 1) Check-in Guest / Party                        |\n"
           + " | 2) View Guests / Guest Groups                    |\n"
-          + " | 3) Book Lightning Lane / Reservation             |\n"
-          + " | 4) Manage Dining Orders                          |\n"
-          + " | 5) Process Retail Sales                          |\n"
-          + " | 6) View Park Stats / Reports                     |\n"
-          + " | 7) Transportation / Shuttle Info                 |\n"
+          + " | 3) Process Retail Sales                          |\n"
+          + " | 4) Manage Restaurants                            |\n"
+          + " | 5) Manage Concessions                            |\n"
+          + " | 6) Manage Hotels                                 |\n"
+          + " | 7) Manage Park Events                            |\n"
           + " | 0) Exit                                          |\n"
           + " |                                                  |\n"
           + " +--------------------------------------------------+\n");
