@@ -15,7 +15,7 @@ public class Guest {
     public double giftCredit;
 
     public Guest(int guestId, String name, int age, String ticketType) {
-        this(guestId, name, age, ticketType, 0.0, 0.0);
+        this(guestId, name, age, ticketType, 50.0, 0.0);
     }
 
     public Guest(int guestId, String name, int age, String ticketType, double money, double giftCredit) {
