@@ -160,7 +160,6 @@ public class GuestRepository {
                         current.addGuest(g);
                     }
                 } catch (Exception e) {
-                    System.err.println("[GuestRepository] Skipping malformed member line: " + line);
                 }
             }
         }
