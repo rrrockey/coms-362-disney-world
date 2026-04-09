@@ -39,7 +39,7 @@ public class DisneyWorld {
         }
         while (true) {
         	
-        	System.out.print("\nEnter a command: ");
+        	System.out.print("\nEnter a command [0-7]: ");
 
 	        String command = sc.next().trim();
 	        switch (command) {
