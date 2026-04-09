@@ -23,7 +23,7 @@ public class GuestRepository {
     // ------------------------------------------------------------------ //
 
     /** Creates the data/ directory and seed files if they don't exist yet. */
-    public static void initialize() throws IOException {
+    public static void initialise() throws IOException {
         Files.createDirectories(Paths.get(DATA_DIR));
 
         Path gf = Paths.get(GUESTS_FILE);
