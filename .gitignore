@@ -32,3 +32,6 @@ replay_pid*
 .project
 .settings/
 data/
+
+# VSCode
+.vscode/

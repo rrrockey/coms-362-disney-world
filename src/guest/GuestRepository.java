@@ -23,7 +23,7 @@ public class GuestRepository {
     // ------------------------------------------------------------------ //
 
     /** Creates the data/ directory and seed files if they don't exist yet. */
-    public static void initialise() throws IOException {
+    public static void initialize() throws IOException {
         Files.createDirectories(Paths.get(DATA_DIR));
 
         Path gf = Paths.get(GUESTS_FILE);
@@ -160,7 +160,6 @@ public class GuestRepository {
                         current.addGuest(g);
                     }
                 } catch (Exception e) {
-                    System.err.println("[GuestRepository] Skipping malformed member line: " + line);
                 }
             }
         }
