@@ -69,7 +69,7 @@ public class CheckInGuests {
             printDivider("");
 
         } catch (NumberFormatException e) {
-            System.out.println("\n  Invalid number entered — check-in cancelled.");
+            System.out.println("\n  Invalid number entered - check-in cancelled.");
         } catch (Exception e) {
             System.err.println("\n  Check-in failed: " + e.getMessage());
         }
