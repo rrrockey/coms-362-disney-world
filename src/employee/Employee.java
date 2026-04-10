@@ -1,5 +1,5 @@
 package employee;
 
-public class Employee {
+public abstract class Employee {
 
 }
