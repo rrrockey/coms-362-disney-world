@@ -18,16 +18,16 @@ import java.util.Scanner;
 public class DisneyWorld {
 
 
-    private static final Scanner sc = new Scanner(System.in); // fixed: was __sc__ but referenced as sc
+    private static final Scanner sc = new Scanner(System.in); 
     private static final RetailSalesRegister register = new RetailSalesRegister();
     private static final RetailSalesEmployee employee = new RetailSalesEmployee();
     private static final List<RetailItem> inventory = new ArrayList<>();
 
-    // ------------------------------------------------------------------ //
-
+    
     public static void main(String[] args) {
         printBanner();
         printMenu();
+        boolean running = true;
 
         // Initialize persistence layer (creates data/ dir + CSV files if absent)
         try {
@@ -39,20 +39,33 @@ public class DisneyWorld {
             System.err.println("Failed to initialise data directory: " + e.getMessage());
             return;
         }
-        while (true) {
+        while (running) {
         	
         	System.out.print("\nEnter a command [0-7]: ");
 
 	        String command = sc.next().trim();
 	        switch (command) {
-	            case "1" -> CheckInGuests.checkInGuests();
-	            case "2" -> ViewGuests.viewGuests();
-	            case "3" -> processRetailSales();
+	            case "1" -> {
+	            	CheckInGuests.checkInGuests();
+	            	printMenu(); // print the menu again when the user falls out
+	            }
+	            case "2" -> {
+	            	ViewGuests.viewGuests();
+	            	printMenu();
+	            }
+	            case "3" -> {
+	            	processRetailSales();
+	            	printMenu();
+
+	            }
 	            case "4" -> System.out.println("[stub] Manage Restaurants");
 	            case "5" -> System.out.println("[stub] Manage Concessions");
-	            case "6" -> ManageHotels.manageHotels();
+	            case "6" -> {
+	            	ManageHotels.manageHotels();
+	            	printMenu();
+	            }
 	            case "7" -> System.out.println("[stub] Manage Park Events");
-	            case "0" -> {System.out.println("Goodbye!"); break;}
+	            case "0" -> {System.out.println("Goodbye!"); running = false;}
 	            default  -> System.out.println("Invalid command. Please enter 0-7.");
 
 	        }
@@ -215,7 +228,7 @@ public class DisneyWorld {
 
     private static void printMenu() {
         System.out.print(
-            " +--------------------------------------------------+\n"
+            " \n+--------------------------------------------------+\n"
           + " |                                                  |\n"
           + " | 1) Check-in Guest / Party                        |\n"
           + " | 2) View Guests / Guest Groups                    |\n"
