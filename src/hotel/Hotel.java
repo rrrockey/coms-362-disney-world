@@ -1,5 +1,6 @@
 package hotel;
 
 public class Hotel {
-	// hotel
+	// to be implemented later. 
+	// for this iteration, the HotelRepository just autofills a CSV with 10 Rooms
 }
