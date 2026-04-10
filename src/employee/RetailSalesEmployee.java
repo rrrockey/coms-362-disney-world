@@ -2,7 +2,7 @@ package employee;
 
 import retailsales.RetailItem;
 
-public class RetailSalesEmployee {
+public class RetailSalesEmployee extends Employee {
     public void restockItem(RetailItem item, int quantity) {
         if (item.stock + quantity <= item.capacity) {
             item.stock += quantity;
