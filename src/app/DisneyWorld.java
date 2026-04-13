@@ -2,6 +2,8 @@
 package app;
 
 import guest.*;
+import parkevents.EventRepository;
+import parkevents.ManageParkEvents;
 import retailsales.*;
 import employee.*;
 import hotel.*;
@@ -34,6 +36,7 @@ public class DisneyWorld {
 
             GuestRepository.initialise();
             HotelRepository.initialise();
+            EventRepository.initialise();
             initInventory();
         } catch (Exception e) {
             System.err.println("Failed to initialise data directory: " + e.getMessage());
@@ -64,7 +67,10 @@ public class DisneyWorld {
 	            	ManageHotels.manageHotels();
 	            	printMenu();
 	            }
-	            case "7" -> System.out.println("[stub] Manage Park Events");
+                case "7" -> {
+                    ManageParkEvents.manageParkEvents();
+                    printMenu();
+                }
 	            case "0" -> {System.out.println("Goodbye!"); running = false;}
 	            default  -> System.out.println("Invalid command. Please enter 0-7.");
 
