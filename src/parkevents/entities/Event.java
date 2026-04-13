@@ -2,6 +2,7 @@ package parkevents.entities;
 
 import parkevents.EventType;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
@@ -13,11 +14,11 @@ import java.util.List;
         private String title;
         private EventType type;
         private String description;
-        private String date;
+        private LocalDate date;
         private final List<String> performerEmployees;
         private boolean saved;
 
-        public Event(String title, EventType type, String description, String date) {
+        public Event(String title, EventType type, String description, LocalDate date) {
             this.title = title;
             this.type = type;
             this.description = description;
@@ -38,7 +39,7 @@ import java.util.List;
             return description;
         }
 
-        public String getDate() {
+        public LocalDate getDate() {
             return date;
         }
 
@@ -64,7 +65,7 @@ import java.util.List;
             this.saved = true;
         }
 
-        public void updateEvent(String title, String description, String date) {
+        public void updateEvent(String title, String description, LocalDate date) {
             this.title = title;
             this.description = description;
             this.date = date;
