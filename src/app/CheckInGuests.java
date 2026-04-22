@@ -107,16 +107,20 @@ public class CheckInGuests {
             }
         };
 
+        System.out.print(prompt + "Does this guest have a membership? (y/n): ");
+        boolean isMember = sc.nextLine().trim().equalsIgnoreCase("y");
+
         int id = GuestRepository.nextGuestId();
-        return new Guest(id, name, age, ticket);
+        return new Guest(id, name, age, ticket, 50.0, 0.0, isMember);
     }
 
     private static void printGuestConfirmation(Guest g) {
         System.out.println();
-        System.out.printf("  %-12s %s%n",  "Name:",    g.name);
-        System.out.printf("  %-12s %d%n",  "Age:",     g.age);
-        System.out.printf("  %-12s %s%n",  "Ticket:",  g.ticketType);
-        System.out.printf("  %-12s %d%n",  "Guest ID:", g.guestId);
+        System.out.printf("  %-12s %s%n",  "Name:",       g.name);
+        System.out.printf("  %-12s %d%n",  "Age:",        g.age);
+        System.out.printf("  %-12s %s%n",  "Ticket:",     g.ticketType);
+        System.out.printf("  %-12s %d%n",  "Guest ID:",   g.guestId);
+        System.out.printf("  %-12s %s%n",  "Member:",     g.isMember ? "Yes" : "No");
         printDivider("");
     }
 

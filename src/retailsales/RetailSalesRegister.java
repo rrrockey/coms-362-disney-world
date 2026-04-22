@@ -1,6 +1,7 @@
 package retailsales;
 
 import guest.Guest;
+import employee.RetailSalesEmployee;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,68 @@ public class RetailSalesRegister {
         Transaction transaction = new Transaction(item, price, paymentType);
         salesLedger.add(transaction);
         System.out.println("Purchase successful: " + transaction);
+    }
+
+    /**
+     * @param employee    the retail sales employee at the register
+     * @param guest       the customer
+     * @param item        the item being purchased
+     * @param paymentType "Cash" or "Gift Credit"
+     */
+    public void processMembershipDiscountPurchase(RetailSalesEmployee employee,
+                                                  Guest guest,
+                                                  RetailItem item,
+                                                  String paymentType) {
+        // Employee verifies membership
+        if (!employee.verifyMembership(guest)) {
+            System.out.println("Membership discount purchase failed: guest does not have a valid membership.");
+            return;
+        }
+
+        // Out of stock check
+        if (item.stock <= 0) {
+            System.out.println("Membership discount purchase failed: " + item.name + " is out of stock.");
+            return;
+        }
+
+        // Calculate discounted price
+        double discountedPrice = item.price * (1.0 - Guest.MEMBERSHIP_DISCOUNT);
+        System.out.printf("Membership discount applied (%.0f%% off): $%.2f -> $%.2f%n",
+                Guest.MEMBERSHIP_DISCOUNT * 100, item.price, discountedPrice);
+
+        // Payment
+        if (paymentType.equalsIgnoreCase("Cash")) {
+            // customer pays with cash
+            if (guest.money < discountedPrice) {
+                // payment declined
+                System.out.println("Transaction terminated: insufficient cash. Required: $"
+                        + String.format("%.2f", discountedPrice) + ", available: $"
+                        + String.format("%.2f", guest.money));
+                return;
+            }
+            guest.money -= discountedPrice;
+
+        } else if (paymentType.equalsIgnoreCase("Gift Credit")) {
+            // customer uses gift credit instead of cash
+            if (guest.giftCredit < discountedPrice) {
+                // payment declined
+                System.out.println("Transaction terminated: insufficient gift credit. Required: $"
+                        + String.format("%.2f", discountedPrice) + ", available: $"
+                        + String.format("%.2f", guest.giftCredit));
+                return;
+            }
+            guest.giftCredit -= discountedPrice;
+
+        } else {
+            System.out.println("Membership discount purchase failed: invalid payment type '" + paymentType + "'.");
+            return;
+        }
+
+        // Record transaction in sales ledger and print receipt
+        item.stock--;
+        Transaction transaction = new Transaction(item, discountedPrice, paymentType);
+        salesLedger.add(transaction);
+        System.out.println("Receipt: " + transaction);
     }
 
     public void processReturn(Guest guest, Transaction transaction, String refundType) {
