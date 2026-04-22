@@ -124,7 +124,9 @@ public class DisneyWorld {
 
             System.out.println("\nSelect Guest:");
             for (int i = 0; i < guests.size(); i++) {
-                System.out.println((i + 1) + ") " + guests.get(i).name + " (Money: " + guests.get(i).money + ", Credit: " + guests.get(i).giftCredit + ")");
+                Guest g = guests.get(i);
+                String memberTag = g.isMember ? " [Member]" : "";
+                System.out.println((i + 1) + ") " + g.name + memberTag + " (Money: " + g.money + ", Credit: " + g.giftCredit + ")");
             }
             int gIdx = Integer.parseInt(sc.nextLine()) - 1;
             Guest guest = guests.get(gIdx);
@@ -139,6 +141,17 @@ public class DisneyWorld {
 
             System.out.print("Payment Method (Cash/Gift Credit): ");
             String paymentType = sc.nextLine().trim();
+
+            // Apply membership discount if the guest is a member and opts in
+            if (guest.isMember) {
+                System.out.print("Apply membership discount (10% off)? (y/n): ");
+                boolean applyDiscount = sc.nextLine().trim().equalsIgnoreCase("y");
+                if (applyDiscount) {
+                    register.processMembershipDiscountPurchase(employee, guest, item, paymentType);
+                    GuestRepository.saveGuest(guest);
+                    return;
+                }
+            }
 
             register.processPurchase(guest, item, paymentType);
             GuestRepository.saveGuest(guest); // Persist updated guest funds
