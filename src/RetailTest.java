@@ -4,8 +4,8 @@ import employee.RetailSalesEmployee;
 
 public class RetailTest {
     public static void main(String[] args) {
-        // Setup
-        Guest guest = new Guest(1, "Charlie", 25, "Annual Pass", 100.0, 50.0);
+        // Setup — member guest with $100 cash and $50 gift credit
+        Guest guest = new Guest(1, "Charlie", 25, "Annual Pass", 100.0, 50.0, true);
         RetailItem mickeyEars = new RetailItem("Mickey Ears", 25.0, 5, 10);
         RetailSalesRegister register = new RetailSalesRegister();
         RetailSalesEmployee employee = new RetailSalesEmployee();
@@ -37,5 +37,38 @@ public class RetailTest {
         System.out.println("\nTesting Employee Restock:");
         employee.restockItem(mickeyEars, 10); // Exceeds capacity (5+1=6, 6+10=16 > 10)
         System.out.println("Stock: " + mickeyEars.stock);
+
+        // ---------------------------------------------------------------
+        // Use Case: Apply membership discount to purchase
+        // ---------------------------------------------------------------
+
+        // Reset guest funds for discount tests
+        guest.money      = 100.0;
+        guest.giftCredit = 50.0;
+        RetailItem mug = new RetailItem("Disney Mug", 20.0, 5, 10);
+
+        // 5. Membership discount — Main success scenario (cash, 10% off $20 = $18)
+        System.out.println("\n--- UC: Membership Discount (Cash - Main Success Scenario) ---");
+        register.processMembershipDiscountPurchase(employee, guest, mug, "Cash");
+        System.out.println(guest);
+        System.out.println("Stock: " + mug.stock);
+
+        // 6. Membership discount — Alternate flow A: gift credit payment (10% off $20 = $18)
+        System.out.println("\n--- UC: Membership Discount (Gift Credit - Alternate Flow A) ---");
+        register.processMembershipDiscountPurchase(employee, guest, mug, "Gift Credit");
+        System.out.println(guest);
+        System.out.println("Stock: " + mug.stock);
+
+        // 7. Membership discount — Alternate flow B: payment declined (broke guest)
+        System.out.println("\n--- UC: Membership Discount (Payment Declined - Alternate Flow B) ---");
+        Guest brokeGuest = new Guest(2, "Daisy", 30, "Annual Pass", 0.0, 0.0, true);
+        register.processMembershipDiscountPurchase(employee, brokeGuest, mug, "Cash");
+        System.out.println(brokeGuest);
+
+        // 8. Membership discount — No membership (precondition not met)
+        System.out.println("\n--- UC: Membership Discount (No Membership - Precondition Failure) ---");
+        Guest nonMember = new Guest(3, "Goofy", 40, "1-Day", 100.0, 0.0, false);
+        register.processMembershipDiscountPurchase(employee, nonMember, mug, "Cash");
+        System.out.println(nonMember);
     }
 }

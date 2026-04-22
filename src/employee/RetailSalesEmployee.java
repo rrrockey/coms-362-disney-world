@@ -1,8 +1,26 @@
 package employee;
 
+import guest.Guest;
 import retailsales.RetailItem;
 
 public class RetailSalesEmployee extends Employee {
+
+    /**
+     * Verifies whether the given guest holds a valid membership.
+     *
+     * @param guest the guest to verify
+     * @return true if the guest is a member, false otherwise
+     */
+    public boolean verifyMembership(Guest guest) {
+        if (guest.isMember) {
+            System.out.println("Membership verified for guest: " + guest.name);
+            return true;
+        } else {
+            System.out.println("No valid membership found for guest: " + guest.name);
+            return false;
+        }
+    }
+
     public void restockItem(RetailItem item, int quantity) {
         if (item.stock + quantity <= item.capacity) {
             item.stock += quantity;
