@@ -10,9 +10,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import parkevents.entities.AbstractEvent;
 import parkevents.entities.Concert;
 import parkevents.entities.Movie;
 import parkevents.entities.Play;
+import parkevents.EventType;
 
 public class EventRepository {
     private static final List<Event> events = new ArrayList<>();
@@ -50,18 +52,25 @@ public class EventRepository {
                     continue;
                 }
 
-                String type = unescape(parts[0]);
-                String title = unescape(parts[1]);
-                String description = unescape(parts[2]);
-                LocalDate date = LocalDate.parse(unescape(parts[3]));
+                try {
+                    EventType type = parseEventType(unescape(parts[0]));
+                    String title = unescape(parts[1]);
+                    String description = unescape(parts[2]);
+                    LocalDate date = LocalDate.parse(unescape(parts[3]));
 
-                Event event = createEventByType(type, title, description, date);
-                if (event == null) {
-                    continue;
+                    Event event = createEventByType(type, title, description, date);
+                    if (event == null) {
+                        continue;
+                    }
+
+                    if (event instanceof AbstractEvent abstractEvent) {
+                        abstractEvent.saveEvent();
+                    }
+
+                    events.add(event);
+                } catch (Exception e) {
+                    System.err.println("Skipping invalid event row: " + line);
                 }
-
-                event.saveEvent();
-                events.add(event);
             }
         }
 
@@ -81,7 +90,10 @@ public class EventRepository {
 
     public static void saveEvent(Event event) throws IOException {
         if (event != null && !events.contains(event)) {
-            event.saveEvent();
+            if (event instanceof AbstractEvent abstractEvent) {
+                abstractEvent.saveEvent();
+            }
+
             events.add(event);
             writeAllEvents();
         }
@@ -89,8 +101,14 @@ public class EventRepository {
 
     public static void updateEvent(int index, String title, String description, LocalDate date) throws IOException {
         Event event = getEvent(index);
-        event.updateEvent(title, description, date);
-        writeAllEvents();
+
+        if (event instanceof AbstractEvent abstractEvent) {
+            abstractEvent.updateEvent(title, description, date);
+            writeAllEvents();
+            return;
+        }
+
+        throw new IllegalStateException("Event does not support updates.");
     }
 
     private static void writeAllEvents() throws IOException {
@@ -104,20 +122,23 @@ public class EventRepository {
 
     private static String toCsvLine(Event event) {
         return String.join(",",
-                escape(event.getType().toString()),
+                escape(event.getType().name()),
                 escape(event.getTitle()),
                 escape(event.getDescription()),
                 escape(event.getDate().toString())
         );
     }
 
-    private static Event createEventByType(String type, String title, String description, LocalDate date) {
-        return switch (type.toLowerCase()) {
-            case "concert" -> new Concert(title, description, date);
-            case "movie" -> new Movie(title, description, date);
-            case "play" -> new Play(title, description, date);
-            default -> null;
+    private static Event createEventByType(EventType type, String title, String description, LocalDate date) {
+        return switch (type) {
+            case CONCERT -> new Concert(title, description, date);
+            case MOVIE -> new Movie(title, description, date);
+            case PLAY -> new Play(title, description, date);
         };
+    }
+
+    private static EventType parseEventType(String value) {
+        return EventType.valueOf(value.trim().toUpperCase());
     }
 
     private static String escape(String value) {
