@@ -9,7 +9,6 @@ import employee.*;
 import hotel.*;
 
 
-import app.CheckInGuests;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -62,7 +61,10 @@ public class DisneyWorld {
 
 	            }
 	            case "4" -> System.out.println("[stub] Manage Restaurants");
-	            case "5" -> System.out.println("[stub] Manage Concessions");
+	            case "5" -> {
+                    ManageDining.manageConcessions();
+                    printMenu();
+                }
 	            case "6" -> {
 	            	ManageHotels.manageHotels();
 	            	printMenu();

@@ -1,4 +1,4 @@
-package concessions;
+package dining;
 
 /**
  * Represents a singular menu item for a concessions stand.
@@ -6,19 +6,21 @@ package concessions;
  * @author cole-giles
  */
 public class MenuItem {
+    private ServiceType serviceType;
     private String name;
     private String description;
     private double price;
-    private boolean availability;
 
-    public MenuItem(String name, String description, double price, boolean availability) {
+    public MenuItem(ServiceType serviceType, String name, String description, double price) {
+        this.serviceType = serviceType;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.availability = availability;
     }
 
+    public String getServiceType() {return serviceType;}
     public String getName() {return name;}
     public String getDescription() {return description;}
     public double getPrice() {return price;}
+
 }
