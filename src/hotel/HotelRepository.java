@@ -114,7 +114,7 @@ public class HotelRepository {
     public static List<Room> findAvailableRooms() throws IOException {
         Set<Integer> occupied = new HashSet<>();
         for (Booking b : loadAllBookings()) {
-            if (b.status == RoomStatus.BOOKED || b.status == RoomStatus.CHECKED_IN) {
+            if (b.status == RoomStatus.BOOKED || b.status == RoomStatus.CHECKED_IN || b.status == RoomStatus.NEEDS_CLEANING) {
                 occupied.add(b.roomId);
             }
         }
