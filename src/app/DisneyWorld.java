@@ -60,21 +60,20 @@ public class DisneyWorld {
 	            	printMenu();
 
 	            }
-	            case "4" -> System.out.println("[stub] Manage Restaurants");
-	            case "5" -> {
-                    ManageDining.manageConcessions();
+	            case "4" -> {
+                    ManageDining.manageDining();
                     printMenu();
                 }
-	            case "6" -> {
+	            case "5" -> {
 	            	ManageHotels.manageHotels();
 	            	printMenu();
 	            }
-                case "7" -> {
+                case "6" -> {
                     ManageParkEvents.manageParkEvents();
                     printMenu();
                 }
 	            case "0" -> {System.out.println("Goodbye!"); running = false;}
-	            default  -> System.out.println("Invalid command. Please enter 0-7.");
+	            default  -> System.out.println("Invalid command. Please enter 0-6.");
 
 	        }
         }
@@ -254,10 +253,9 @@ public class DisneyWorld {
           + " | 1) Check-in Guest / Party                        |\n"
           + " | 2) View Guests / Guest Groups                    |\n"
           + " | 3) Process Retail Sales                          |\n"
-          + " | 4) Manage Restaurants                            |\n"
-          + " | 5) Manage Concessions                            |\n"
-          + " | 6) Manage Hotels                                 |\n"
-          + " | 7) Manage Park Events                            |\n"
+          + " | 4) Manage Dining                                 |\n"
+          + " | 5) Manage Hotels                                 |\n"
+          + " | 6) Manage Park Events                            |\n"
           + " | 0) Exit                                          |\n"
           + " |                                                  |\n"
           + " +--------------------------------------------------+\n");
