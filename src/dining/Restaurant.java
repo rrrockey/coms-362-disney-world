@@ -14,10 +14,12 @@ public class Restaurant extends FoodService{
         super(ServiceType.RESTAURANT, inventory);
         tables = new ArrayList<>();
         this.reservations = new ArrayList<>();
+
+        initializeTables();
     }
 
     // Create a reservation given a guest's name, a size for the party, and a date and time
-    public Reservation makeReservation (String guestName, int partySize, String date, String time, int tableNum) {
+    public Reservation makeReservation (String guestName, int partySize, String date, String time) {
 
         //Basic validation to check for no guest name or invalid party size
         if (guestName == null || guestName.isBlank()) {
@@ -132,6 +134,15 @@ public class Restaurant extends FoodService{
         }
 
         return null; // No table available
+    }
+
+    private void initializeTables() {
+        tables.add(new Table(1, 2));
+        tables.add(new Table(2, 2));
+        tables.add(new Table(3, 4));
+        tables.add(new Table(4, 4));
+        tables.add(new Table(5, 6));
+        tables.add(new Table(6, 8));
     }
 
     // ------------------------------------------------------------------ //
