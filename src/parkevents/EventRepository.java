@@ -14,7 +14,6 @@ import parkevents.entities.AbstractEvent;
 import parkevents.entities.Concert;
 import parkevents.entities.Movie;
 import parkevents.entities.Play;
-import parkevents.EventType;
 
 public class EventRepository {
     private static final List<Event> events = new ArrayList<>();
@@ -109,6 +108,12 @@ public class EventRepository {
         }
 
         throw new IllegalStateException("Event does not support updates.");
+    }
+
+    public static void deleteEvent(int index) throws IOException {
+        getEvent(index);
+        events.remove(index);
+        writeAllEvents();
     }
 
     private static void writeAllEvents() throws IOException {
