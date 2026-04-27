@@ -18,7 +18,7 @@ public class MenuItem {
         this.price = price;
     }
 
-    public String getServiceType() {return serviceType;}
+    public ServiceType getServiceType() {return serviceType;}
     public String getName() {return name;}
     public String getDescription() {return description;}
     public double getPrice() {return price;}
