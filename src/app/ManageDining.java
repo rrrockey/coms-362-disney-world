@@ -4,6 +4,7 @@ import  dining.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ManageDining {
@@ -15,10 +16,10 @@ public class ManageDining {
     private static final String INVENTORY_FILE = "data/inventory.csv";
     private static final String RESERVATION_FILE = "data/reservations.csv";
 
-    private static final FoodInventory concessionsInventory = new FoodInventory(ServiceType.CONCESSIONS);
+    private static final DiningInventory concessionsInventory = new DiningInventory(ServiceType.CONCESSIONS);
     private static final Concessions concessions = new Concessions(concessionsInventory);
 
-    private static final FoodInventory restaurantInventory = new FoodInventory(ServiceType.RESTAURANT);
+    private static final DiningInventory restaurantInventory = new DiningInventory(ServiceType.RESTAURANT);
     private static final Restaurant restaurant = new Restaurant(restaurantInventory);
 
     public static void manageDining () {
@@ -54,6 +55,8 @@ public class ManageDining {
                 case "1" -> viewMenu(concessions, concessionsInventory, "CONCESSIONS MENU");
                 case "2" -> openOrder(concessions, concessionsInventory, ORDER_FILE, INVENTORY_FILE, "OPEN CONCESSIONS ORDER");
                 case "3" -> viewOrderStatus(concessions);
+                case "4" -> viewInventory(concessionsInventory);
+                case "5" -> updateInventoryItems(concessions, concessionsInventory);
                 case "0" -> {
                     concessions.saveOrdersToCSV(ORDER_FILE);
                     concessionsInventory.saveStockToCSV(INVENTORY_FILE);
@@ -83,6 +86,8 @@ public class ManageDining {
                 case "4" -> makeRestaurantReservation();
                 case "5" -> viewRestaurantReservation();
                 case "6" -> cancelRestaurantReservation();
+                case "7" -> viewInventory(restaurantInventory);
+                case "8" -> updateInventoryItems(restaurant, restaurantInventory);
                 case "0" -> {
                     restaurant.saveOrdersToCSV(ORDER_FILE);
                     restaurantInventory.saveStockToCSV(INVENTORY_FILE);
@@ -94,7 +99,11 @@ public class ManageDining {
         }
     }
 
-    private static void viewMenu(FoodService service, FoodInventory inventory, String label) {
+    // ------------------------------------------------------------------ //
+    //  METHODS FOR CONCESSIONS FUNCTIONALITY
+    // ------------------------------------------------------------------ //
+
+    private static void viewMenu(FoodService service, DiningInventory inventory, String label) {
         System.out.println();
         printDivider(label);
 
@@ -121,7 +130,7 @@ public class ManageDining {
         }
     }
 
-    private static void openOrder(FoodService service, FoodInventory inventory, String orderFile, String inventoryFile, String label) {
+    private static void openOrder(FoodService service, DiningInventory inventory, String orderFile, String inventoryFile, String label) {
         List<MenuItem> menu = service.getMenu();
 
         if (menu.isEmpty()) {
@@ -215,7 +224,6 @@ public class ManageDining {
         System.out.println("  Status: " + order.getStatus());
     }
 
-
     private static void viewOrderStatus(FoodService service) {
         System.out.print("  Enter order ID: ");
         String input = sc.nextLine().trim();
@@ -228,6 +236,10 @@ public class ManageDining {
             System.out.println("  Invalid order ID.");
         }
     }
+
+    // ------------------------------------------------------------------ //
+    //  METHODS FOR RESTAURANT FUNCTIONALITY
+    // ------------------------------------------------------------------ //
 
     private static void makeRestaurantReservation() {
         System.out.println();
@@ -305,6 +317,96 @@ public class ManageDining {
         }
     }
 
+    // ------------------------------------------------------------------ //
+    //  METHODS FOR INVENTORY MANAGEMENT
+    // ------------------------------------------------------------------ //
+
+    private static void updateInventoryItems(FoodService service, DiningInventory inventory) {
+        System.out.println();
+        printDivider("UPDATE INVENTORY");
+
+        viewInventory(inventory);
+
+        System.out.print("  Enter item name to update: ");
+        String itemName = sc.nextLine().trim();
+
+        boolean newItem = false;
+
+        if (!inventory.containsItem(itemName)) {
+            System.out.println("  Item not found in inventory.");
+            System.out.print("  Would you like to add it? (y/n): ");
+            String addChoice = sc.nextLine().trim().toLowerCase();
+
+            if (!addChoice.equals("y")) {
+                System.out.println("  Inventory update cancelled.");
+                return;
+            }
+
+            newItem = true;
+        }
+
+        System.out.print("  Enter quantity to add, or press Enter to add default stock of 20: ");
+        String input = sc.nextLine().trim();
+
+        int amountToAdd;
+
+        if (input.isEmpty()) {
+            amountToAdd = 20;
+        } else {
+            try {
+                amountToAdd = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("  Invalid quantity. Please enter a valid whole number.");
+                return;
+            }
+        }
+
+        if (amountToAdd <= 0) {
+            System.out.println("  Invalid quantity. Quantity must be greater than zero.");
+            return;
+        }
+
+        if (newItem) {
+            System.out.print("  Enter item description: ");
+            String description = sc.nextLine().trim();
+
+            System.out.print("  Enter item price: ");
+            double price;
+
+            try {
+                price = Double.parseDouble(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("  Invalid price.");
+                return;
+            }
+
+            if (price < 0) {
+                System.out.println("  Price cannot be negative.");
+                return;
+            }
+
+            MenuItem newMenuItem = new MenuItem(
+                    service.getServiceType(),
+                    itemName,
+                    description,
+                    price
+            );
+
+            service.addMenuItem(newMenuItem);
+            service.saveMenuToCSV(MENU_FILE);
+        }
+
+        inventory.addQuantity(itemName, amountToAdd);
+        inventory.saveStockToCSV(INVENTORY_FILE);
+
+        System.out.println("  Inventory item updated successfully.");
+        System.out.println("  " + itemName + " quantity is now " + inventory.getQuantity(itemName) + ".");
+    }
+
+    // ------------------------------------------------------------------ //
+    //  HELPERS TO PRINT OUT MENU FOR DINING
+    // ------------------------------------------------------------------ //
+
     private static void printDiningMenu() {
         System.out.println();
         printDivider("DINING MANAGEMENT");
@@ -321,6 +423,8 @@ public class ManageDining {
         System.out.println("  [1] View Concessions Menu");
         System.out.println("  [2] Open Concessions Order");
         System.out.println("  [3] View Order Status");
+        System.out.println("  [4] View Inventory");
+        System.out.println("  [5] Add/Update Inventory Item");
         System.out.println("  [0] Back");
         printDivider("");
         System.out.print("  Choice: ");
@@ -335,9 +439,25 @@ public class ManageDining {
         System.out.println("  [4] Make Reservation");
         System.out.println("  [5] View Reservation");
         System.out.println("  [6] Cancel Reservation");
+        System.out.println("  [7] View Inventory");
+        System.out.println("  [8] Add/Update Inventory Item");
         System.out.println("  [0] Back");
         printDivider("");
         System.out.print("  Choice: ");
+    }
+
+    private static void viewInventory(DiningInventory inventory) {
+        System.out.println();
+        printDivider("CURRENT INVENTORY");
+
+        if (inventory.getStock().isEmpty()) {
+            System.out.println("No inventory items found.");
+            return;
+        }
+
+        for (Map.Entry<String, Integer> entry : inventory.getStock().entrySet()) {
+            System.out.println("  " + entry.getKey() + ": " + entry.getValue());
+        }
     }
 
     private static void printDivider(String label) {

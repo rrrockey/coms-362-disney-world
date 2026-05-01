@@ -9,9 +9,9 @@ public abstract class FoodService implements OrderService {
     protected ServiceType serviceType;
     protected List<MenuItem> menu;
     protected List<Order> orders;
-    protected FoodInventory  inventory;
+    protected DiningInventory inventory;
 
-    public FoodService(ServiceType serviceType, FoodInventory inventory) {
+    public FoodService(ServiceType serviceType, DiningInventory inventory) {
         this.serviceType = serviceType;
         this.inventory = inventory;
         this.menu = new ArrayList<>();
@@ -24,6 +24,10 @@ public abstract class FoodService implements OrderService {
 
     public List<MenuItem> getMenu() {
         return menu;
+    }
+
+    public void addMenuItem(MenuItem menuItem) {
+        menu.add(menuItem);
     }
 
     public List<Order> getOrders() {

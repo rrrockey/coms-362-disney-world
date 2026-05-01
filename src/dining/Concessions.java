@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class Concessions extends FoodService {
 
-    public Concessions(FoodInventory inventory) {
+    public Concessions(DiningInventory inventory) {
         super(ServiceType.CONCESSIONS, inventory);
     }
 
