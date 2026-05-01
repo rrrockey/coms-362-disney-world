@@ -5,6 +5,7 @@ import guest.*;
 import parkevents.EventRepository;
 import parkevents.ManageParkEvents;
 import retailsales.*;
+import rides.RideRepository;
 import employee.*;
 import hotel.*;
 
@@ -32,6 +33,7 @@ public class DisneyWorld {
             GuestRepository.initialise();
             HotelRepository.initialise();
             EventRepository.initialise();
+            RideRepository.initialise();
             RetailSales.initInventory();
         } catch (Exception e) {
             System.err.println("Failed to initialise data directory: " + e.getMessage());
@@ -44,28 +46,31 @@ public class DisneyWorld {
 	        String command = sc.next().trim();
 	        switch (command) {
 	            case "1" -> {
-	            	CheckInGuests.checkInGuests();
-	            	printMenu(); // print the menu again when the user falls out
+		            	CheckInGuests.checkInGuests();
+		            	printMenu(); // print the menu again when the user falls out
 	            }
 	            case "2" -> {
-	            	ViewGuests.viewGuests();
-	            	printMenu();
+		            	ViewGuests.viewGuests();
+		            	printMenu();
 	            }
 	            case "3" -> {
-	            	RetailSales.processRetailSales();
-	            	printMenu();
-
+		            	RetailSales.processRetailSales();
+		            	printMenu();
 	            }
 	            case "4" -> {
                     ManageDining.manageDining();
                     printMenu();
                 }
 	            case "5" -> {
-	            	ManageHotels.manageHotels();
-	            	printMenu();
+		            	ManageHotels.manageHotels();
+		            	printMenu();
 	            }
                 case "6" -> {
                     ManageParkEvents.manageParkEvents();
+                    printMenu();
+                }
+                case "7" -> {
+                    ManageRideQueues.manageRideQueues();
                     printMenu();
                 }
 	            case "0" -> {System.out.println("Goodbye!"); running = false;}
@@ -74,10 +79,6 @@ public class DisneyWorld {
 	        }
         }
     }
-
-    
-
-    
 
     // ------------------------------------------------------------------ //
     //  UI helpers
@@ -104,7 +105,7 @@ public class DisneyWorld {
 
     private static void printMenu() {
         System.out.print(
-            " \n+--------------------------------------------------+\n"
+            " \n +--------------------------------------------------+\n"
           + " |                                                  |\n"
           + " | 1) Check-in Guest / Party                        |\n"
           + " | 2) View Guests / Guest Groups                    |\n"
@@ -112,6 +113,7 @@ public class DisneyWorld {
           + " | 4) Manage Dining                                 |\n"
           + " | 5) Manage Hotels                                 |\n"
           + " | 6) Manage Park Events                            |\n"
+          + " | 7) Manage Ride Queue                             |\n"
           + " | 0) Exit                                          |\n"
           + " |                                                  |\n"
           + " +--------------------------------------------------+\n");
