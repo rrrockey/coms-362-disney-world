@@ -10,7 +10,7 @@ public class Restaurant extends FoodService{
     private List<Reservation> reservations;
     private List<Table> tables;
 
-    public Restaurant(FoodInventory inventory) {
+    public Restaurant(DiningInventory inventory) {
         super(ServiceType.RESTAURANT, inventory);
         tables = new ArrayList<>();
         this.reservations = new ArrayList<>();
