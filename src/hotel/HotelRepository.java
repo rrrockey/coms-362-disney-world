@@ -113,6 +113,7 @@ public class HotelRepository {
      * @param strategy  the algorithm that decides whether a room qualifies
      * @return          rooms for which strategy.isAvailable() returns true
      */
+
     public static List<Room> findAvailableRooms(RoomAvailabilityStrategy strategy)
             throws IOException {
         List<Room>    rooms    = loadAllRooms();
