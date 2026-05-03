@@ -1,5 +1,9 @@
 package hotel;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 /**
  * Represents one booking record.
  * Persisted in data/bookings.csv.
@@ -8,6 +12,7 @@ package hotel;
  */
 public class Booking {
 
+	private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
     public final int    bookingId;
     public final int    roomId;
     public int          guestId;       // 0 = no guest (room is available)
@@ -18,6 +23,8 @@ public class Booking {
 
     public Booking(int bookingId, int roomId, int guestId, String guestName,
                    String checkInDate, String checkOutDate, RoomStatus status) {
+    	
+    	validateDates(checkInDate, checkOutDate);
         this.bookingId    = bookingId;
         this.roomId       = roomId;
         this.guestId      = guestId;
@@ -27,6 +34,32 @@ public class Booking {
         this.status       = status;
     }
 
+    private static void validateDates(String checkInDate, String checkOutDate) {
+    	LocalDate checkIn = parseDate(checkInDate, "checkInDate");
+    	LocalDate checkOut = parseDate(checkOutDate, "checkOutDate");
+    	
+    	LocalDate today = LocalDate.now();
+    	
+    	if (checkIn.isBefore(today)) {
+    		throw new IllegalArgumentException("checkInDate must be not be before today " + today);
+    	}
+    	
+    	if (!checkOut.isAfter(checkIn)) {
+    		throw new IllegalArgumentException("checkOutDate must be after checkInDate");
+    	}
+    }
+    
+    private static LocalDate parseDate(String value, String fieldName) {
+    	if (value == null || value.isBlank()) {
+    		throw new IllegalArgumentException(fieldName + " must not be null or blank.");
+    	}
+    	try {
+    		return LocalDate.parse(value.trim(), DATE_FMT);
+    	} catch (DateTimeParseException e) {
+    		throw new IllegalArgumentException(fieldName + " must be in YYYY-MM-DD format.");
+    	}
+    }
+    
     public String toCsv() {
         return String.join(",",
                 String.valueOf(bookingId),
