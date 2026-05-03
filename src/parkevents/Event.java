@@ -1,22 +1,10 @@
 package parkevents;
 
 import java.time.LocalDate;
-import java.util.List;
-import parkevents.EventType;
 
 public interface Event {
-
-    String getTitle();
     EventType getType();
-    String getDescription();
+    String getTitle();
     LocalDate getDate();
-
-    void addPerformerEmployee(String employeeName);
-    void removePerformerEmployee(String employeeName);
-    List<String> getPerformerEmployees();
-
-    void saveEvent();
-    boolean isSaved();
-
-    void updateEvent(String title, String description, LocalDate date);
+    String getDescription();
 }

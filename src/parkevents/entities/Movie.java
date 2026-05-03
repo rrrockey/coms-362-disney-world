@@ -1,11 +1,15 @@
 package parkevents.entities;
 
 import java.time.LocalDate;
+import parkevents.EventType;
 
-import static parkevents.EventType.MOVIE;
-
-public class Movie extends Event {
+public class Movie extends AbstractEvent {
+    private String genre;
     public Movie(String title, String description, LocalDate date) {
-        super(title, MOVIE, description, date);
+        super(title, description, date, EventType.MOVIE);
+    }
+
+    public String getGenre() {
+        return genre;
     }
 }
