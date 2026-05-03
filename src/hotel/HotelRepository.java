@@ -25,10 +25,13 @@ public class HotelRepository {
         Path hotelPath = Paths.get(HOTEL_FILE);
         if (!Files.exists(hotelPath)) {
             StringBuilder sb = new StringBuilder("roomId,roomNumber,type,nightlyRate\n");
+            // 101–105 Standard @ $250
             for (int i = 0; i < 5; i++)
                 sb.append(String.join(",", str(i + 1), str(101 + i), "Standard", "250.0")).append("\n");
+            // 106–108 Double @ $300
             for (int i = 0; i < 3; i++)
                 sb.append(String.join(",", str(6 + i), str(106 + i), "Double", "300.0")).append("\n");
+            // 109–110 Suite @ $500
             for (int i = 0; i < 2; i++)
                 sb.append(String.join(",", str(9 + i), str(109 + i), "Suite", "500.0")).append("\n");
             Files.writeString(hotelPath, sb.toString());
@@ -101,33 +104,23 @@ public class HotelRepository {
     }
 
     // ================================================================== //
-    //  Room availability — Strategy Pattern
+    //  Room availability helper
     // ================================================================== //
 
     /**
-     * Returns rooms that pass the supplied {@link RoomAvailabilityStrategy}.
-     *
-     * Both the room list and the full booking list are loaded once and
-     * passed to the strategy for every room, keeping I/O minimal.
-     *
-     * @param strategy  the algorithm that decides whether a room qualifies
-     * @return          rooms for which strategy.isAvailable() returns true
-     */
-    public static List<Room> findAvailableRooms(RoomAvailabilityStrategy strategy)
-            throws IOException {
-        List<Room>    rooms    = loadAllRooms();
-        List<Booking> bookings = loadAllBookings();
-        return rooms.stream()
-                .filter(r -> strategy.isAvailable(r, bookings))
-                .toList();
-    }
-
-    /**
-     * Backward-compatible overload — uses {@link StrictAvailabilityStrategy}
-     * so any existing callers continue to work without changes.
+     * Returns rooms that have no BOOKED or CHECKED_IN booking —
+     * i.e. rooms a new guest could book right now.
      */
     public static List<Room> findAvailableRooms() throws IOException {
-        return findAvailableRooms(new StrictAvailabilityStrategy());
+        Set<Integer> occupied = new HashSet<>();
+        for (Booking b : loadAllBookings()) {
+            if (b.status == RoomStatus.BOOKED || b.status == RoomStatus.CHECKED_IN) {
+                occupied.add(b.roomId);
+            }
+        }
+        return loadAllRooms().stream()
+                .filter(r -> !occupied.contains(r.roomId))
+                .toList();
     }
 
     // ------------------------------------------------------------------ //
