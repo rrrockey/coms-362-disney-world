@@ -2,6 +2,8 @@ package app;
 
 import hotel.*;
 import employee.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -9,18 +11,24 @@ import java.util.Scanner;
  * CLI interface for hotel management.
  *
  * Main menu
- *  [1] Book a room        (customer books via staff)
+ *  [1] Book a room        (customer books via staff) — now uses Strategy Pattern
  *  [2] Check in guest     (guest arrives, has booking)
  *  [3] Check out guest    (guest leaves, room → NEEDS_CLEANING)
  *  [4] Mark room cleaned  (housekeeper done, room → AVAILABLE)
  *  [5] View all rooms
  *  [0] Back
+ *
+ * Strategy Pattern change:
+ *   bookRoom() now prompts the agent to choose a search strategy
+ *   (any available, by date range, or by room type) before displaying
+ *   matching rooms.  The chosen strategy is passed to
+ *   HotelRepository.findAvailableRooms(strategy) so the filtering
+ *   algorithm is fully encapsulated and swappable at runtime.
  */
 public class ManageHotels {
 
     private static final Scanner sc = new Scanner(System.in);
 
-    // Hardcoded on-duty employee for this session — extend later if needed
     private static final HotelEmployee FRONT_DESK  =
             new HotelEmployee(1, "Staff", "Front Desk");
     private static final HotelEmployee HOUSEKEEPER =
@@ -44,20 +52,25 @@ public class ManageHotels {
     }
 
     // ------------------------------------------------------------------ //
-    //  [1] Book a room
+    //  [1] Book a room  — Strategy Pattern entry point
     // ------------------------------------------------------------------ //
 
     private static void bookRoom() {
         System.out.println();
         printDivider("BOOK A ROOM");
+
+        RoomAvailabilityStrategy strategy = chooseStrategy();
+        if (strategy == null) return;   // user cancelled
+
         try {
-            List<Room> available = HotelRepository.findAvailableRooms();
+            List<Room> available = HotelRepository.findAvailableRooms(strategy);
+
             if (available.isEmpty()) {
-                System.out.println("  No rooms are currently available.");
+                System.out.println("  No rooms match: " + strategy.description());
                 pause(); return;
             }
 
-            printRoomTable(available, "AVAILABLE ROOMS");
+            printRoomTable(available, strategy.description().toUpperCase());
 
             System.out.print("  Enter room number to book: ");
             int roomNumber = parseIntOrNeg(sc.nextLine().trim());
@@ -94,18 +107,80 @@ public class ManageHotels {
 
             printDivider("");
             System.out.println("  ✓ Room booked successfully!\n");
-            System.out.printf("  %-14s %d%n",   "Room:",       room.roomNumber);
-            System.out.printf("  %-14s %s%n",   "Type:",       room.type);
-            System.out.printf("  %-14s $%.2f/night%n", "Rate:", room.nightlyRate);
-            System.out.printf("  %-14s %s%n",   "Guest:",      guestName);
-            System.out.printf("  %-14s %s → %s%n", "Dates:",   checkIn, checkOut);
-            System.out.printf("  %-14s %s%n",   "Booked by:",  FRONT_DESK);
+            System.out.printf("  %-14s %d%n",            "Room:",       room.roomNumber);
+            System.out.printf("  %-14s %s%n",            "Type:",       room.type);
+            System.out.printf("  %-14s $%.2f/night%n",   "Rate:",       room.nightlyRate);
+            System.out.printf("  %-14s %s%n",            "Guest:",      guestName);
+            System.out.printf("  %-14s %s → %s%n",       "Dates:",      checkIn, checkOut);
+            System.out.printf("  %-14s %s%n",            "Booked by:",  FRONT_DESK);
             printDivider("");
 
         } catch (Exception e) {
             System.out.println("  ERROR: " + e.getMessage());
         }
         pause();
+    }
+
+    // ------------------------------------------------------------------ //
+    //  Strategy selection — returns null if the user cancels
+    // ------------------------------------------------------------------ //
+
+    /**
+     * Prompts the front-desk agent to choose which availability strategy to
+     * use for this booking search.  The returned strategy object is passed
+     * directly to {@link HotelRepository#findAvailableRooms(RoomAvailabilityStrategy)}.
+     *
+     * Adding a new strategy in the future requires only:
+     *   1. A new concrete class implementing RoomAvailabilityStrategy
+     *   2. A new case here — no changes to HotelRepository or booking logic.
+     */
+    private static RoomAvailabilityStrategy chooseStrategy() {
+        printDivider("SEARCH OPTIONS");
+        System.out.println("  [1] Show all available rooms");
+        System.out.println("  [2] Search by date range");
+        System.out.println("  [3] Filter by room type");
+        System.out.println("  [0] Cancel");
+        printDivider("");
+        System.out.print("  Choice: ");
+
+        switch (sc.nextLine().trim()) {
+
+            case "1" -> { return new StrictAvailabilityStrategy(); }
+
+            case "2" -> {
+                try {
+                    System.out.print("  Check-in date  (YYYY-MM-DD): ");
+                    LocalDate checkIn  = LocalDate.parse(sc.nextLine().trim());
+                    System.out.print("  Check-out date (YYYY-MM-DD): ");
+                    LocalDate checkOut = LocalDate.parse(sc.nextLine().trim());
+                    return new DateRangeAvailabilityStrategy(checkIn, checkOut);
+                } catch (DateTimeParseException e) {
+                    System.out.println("  Invalid date format. Returning to menu.");
+                    pause();
+                    return null;
+                } catch (IllegalArgumentException e) {
+                    System.out.println("  " + e.getMessage());
+                    pause();
+                    return null;
+                }
+            }
+
+            case "3" -> {
+                System.out.println("  Room types: Standard / Double / Suite");
+                System.out.print("  Enter type: ");
+                String type = sc.nextLine().trim();
+                if (type.isEmpty()) {
+                    System.out.println("  No type entered. Returning to menu.");
+                    pause();
+                    return null;
+                }
+                return new RoomTypeFilterStrategy(type);
+            }
+
+            default -> {
+                return null;
+            }
+        }
     }
 
     // ------------------------------------------------------------------ //
@@ -140,8 +215,8 @@ public class ManageHotels {
 
             printDivider("");
             System.out.println("  ✓ Guest checked in!\n");
-            System.out.printf("  %-14s %s%n", "Guest:",    booking.guestName);
-            System.out.printf("  %-14s %d%n", "Room:",     room != null ? room.roomNumber : booking.roomId);
+            System.out.printf("  %-14s %s%n", "Guest:",     booking.guestName);
+            System.out.printf("  %-14s %d%n", "Room:",      room != null ? room.roomNumber : booking.roomId);
             System.out.printf("  %-14s %s%n", "Check-out:", booking.checkOutDate);
             System.out.printf("  %-14s %s%n", "Processed:", FRONT_DESK);
             printDivider("");
@@ -228,8 +303,8 @@ public class ManageHotels {
 
             printDivider("");
             System.out.println("  ✓ Room marked as available.\n");
-            System.out.printf("  %-14s %d%n", "Room:",        room != null ? room.roomNumber : booking.roomId);
-            System.out.printf("  %-14s %s%n", "Status:",      RoomStatus.AVAILABLE);
+            System.out.printf("  %-14s %d%n", "Room:",         room != null ? room.roomNumber : booking.roomId);
+            System.out.printf("  %-14s %s%n", "Status:",       RoomStatus.AVAILABLE);
             System.out.printf("  %-14s %s%n", "Confirmed by:", HOUSEKEEPER);
             printDivider("");
 
@@ -250,16 +325,15 @@ public class ManageHotels {
             List<Room>    rooms    = HotelRepository.loadAllRooms();
             List<Booking> bookings = HotelRepository.loadAllBookings();
 
-            System.out.printf("  %-6s  %-10s  %-10s  %10s  %-16s  %s%n",
+            System.out.printf("  %-6s  %-10s  %-10s  %-16s  %-16s  %s%n",
                     "Room", "Type", "Rate/Night", "Status", "Guest", "Dates");
             System.out.println("  " + "─".repeat(72));
 
             for (Room r : rooms) {
-                // Find the most recent active booking for this room
                 Booking active = bookings.stream()
                         .filter(b -> b.roomId == r.roomId &&
                                      b.status != RoomStatus.AVAILABLE)
-                        .reduce((a, b) -> b)   // last entry wins
+                        .reduce((a, b) -> b)
                         .orElse(null);
 
                 String status = active != null ? active.status.name() : "AVAILABLE";
@@ -280,7 +354,7 @@ public class ManageHotels {
     }
 
     // ------------------------------------------------------------------ //
-    //  Formatting helpers
+    //  Formatting helpers (unchanged)
     // ------------------------------------------------------------------ //
 
     private static void printRoomTable(List<Room> rooms, String title) {
