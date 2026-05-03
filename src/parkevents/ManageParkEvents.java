@@ -5,7 +5,6 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
-import parkevents.EventRepository;
 import parkevents.entities.Concert;
 import parkevents.entities.Movie;
 import parkevents.entities.Play;
@@ -22,6 +21,7 @@ public class ManageParkEvents {
             System.out.println("1) Create Event");
             System.out.println("2) View Events");
             System.out.println("3) Edit Existing Event");
+            System.out.println("4) Cancel Event");
             System.out.println("0) Back to Main Menu");
             System.out.print("Select an option: ");
 
@@ -31,6 +31,7 @@ public class ManageParkEvents {
                 case "1" -> createEvent();
                 case "2" -> viewEvents();
                 case "3" -> editEvent();
+                case "4" -> cancelEvent();
                 case "0" -> running = false;
                 default -> System.out.println("Invalid choice.");
             }
@@ -143,6 +144,40 @@ public class ManageParkEvents {
             System.out.println("Event updated successfully.");
         } catch (Exception e) {
             System.err.println("Failed to edit event: " + e.getMessage());
+        }
+    }
+
+    private static void cancelEvent() {
+        try {
+            List<parkevents.Event> events = EventRepository.getAllEvents();
+
+            if (events.isEmpty()) {
+                System.out.println("No events available to cancel");
+                return;
+            }
+
+            viewEvents();
+
+            System.out.print("\nSelect event number to cancel: ");
+            int index = Integer.parseInt(sc.nextLine().trim()) - 1;
+
+            parkevents.Event event = EventRepository.getEvent(index);
+
+            System.out.println("\nSelected Event:");
+            System.out.println(event);
+
+            System.out.print("Are you sure you want to cancel this event? (y/n): ");
+            String confirm = sc.nextLine().trim().toLowerCase();
+
+            if (!confirm.equals("y")) {
+                System.out.println("Cancellation aborted. Event was not changed.");
+                return;
+            }
+
+            EventRepository.deleteEvent(index);
+            System.out.println("Event cancelled successfully.");
+        } catch (Exception e) {
+            System.err.println("Failed to cancel event: " + e.getMessage());
         }
     }
 }
