@@ -9,12 +9,14 @@ import guest.Guest;
 import guest.GuestRepository;
 import retailsales.RetailItem;
 import retailsales.RetailSalesRegister;
+import retailsales.RetailWarehouse;
 import retailsales.Transaction;
 
 public class RetailSales {
     private static final Scanner sc = new Scanner(System.in); 
     private static final RetailSalesRegister register = new RetailSalesRegister();
     private static final RetailSalesEmployee employee = new RetailSalesEmployee();
+    private static final RetailWarehouse warehouse = new RetailWarehouse();
     private static final List<RetailItem> inventory = new ArrayList<>();
     
     // ------------------------------------------------------------------ //
@@ -26,6 +28,11 @@ public class RetailSales {
             inventory.add(new RetailItem("Mickey Ears", 25.0, 10, 20));
             inventory.add(new RetailItem("Disney Pin", 12.5, 50, 100));
             inventory.add(new RetailItem("MagicBand+", 45.0, 5, 15));
+
+            // Initial warehouse stock
+            warehouse.receiveShipment("Mickey Ears", 50);
+            warehouse.receiveShipment("Disney Pin", 200);
+            warehouse.receiveShipment("MagicBand+", 30);
         }
     }
 
@@ -34,8 +41,10 @@ public class RetailSales {
             System.out.println("\n--- Retail Sales Simulation ---");
             System.out.println("1) Purchase Item");
             System.out.println("2) Return Item");
-            System.out.println("3) Restock Item (Employee)");
-            System.out.println("4) View Sales Ledger");
+            System.out.println("3) Restock from Warehouse");
+            System.out.println("4) Receive Shipment (Warehouse)");
+            System.out.println("5) View Sales Ledger");
+            System.out.println("6) View Warehouse Inventory");
             System.out.println("0) Back to Main Menu");
             System.out.print("Select an option: ");
 
@@ -45,8 +54,10 @@ public class RetailSales {
             switch (choice) {
                 case "1" -> handlePurchase();
                 case "2" -> handleReturn();
-                case "3" -> handleRestock();
-                case "4" -> viewLedger();
+                case "3" -> handleWarehouseRestock();
+                case "4" -> handleReceiveShipment();
+                case "5" -> viewLedger();
+                case "6" -> viewWarehouseInventory();
                 case "0" -> { return; }
                 default -> System.out.println("Invalid choice.");
             }
@@ -132,9 +143,9 @@ public class RetailSales {
         }
     }
 
-    public static void handleRestock() {
+    public static void handleWarehouseRestock() {
         try {
-            System.out.println("\nSelect Item to Restock:");
+            System.out.println("\nSelect Item to Restock from Warehouse:");
             for (int i = 0; i < inventory.size(); i++) {
                 RetailItem item = inventory.get(i);
                 System.out.println((i + 1) + ") " + item.name + " [Stock: " + item.stock + "/" + item.capacity + "]");
@@ -142,12 +153,34 @@ public class RetailSales {
             int iIdx = Integer.parseInt(sc.nextLine()) - 1;
             RetailItem item = inventory.get(iIdx);
 
-            System.out.print("Enter quantity to restock: ");
+            System.out.print("Enter quantity to request from warehouse: ");
             int qty = Integer.parseInt(sc.nextLine());
 
-            employee.restockItem(item, qty);
+            employee.requestWarehouseRestock(warehouse, item, qty);
         } catch (Exception e) {
-            System.err.println("Restock failed: " + e.getMessage());
+            System.err.println("Warehouse restock failed: " + e.getMessage());
+        }
+    }
+
+    public static void handleReceiveShipment() {
+        try {
+            System.out.println("\nSelect Item for Warehouse Shipment:");
+            for (int i = 0; i < inventory.size(); i++) {
+                System.out.println((i + 1) + ") " + inventory.get(i).name);
+            }
+            int iIdx = Integer.parseInt(sc.nextLine()) - 1;
+            if (iIdx < 0 || iIdx >= inventory.size()) {
+                System.out.println("Invalid selection.");
+                return;
+            }
+            String name = inventory.get(iIdx).name;
+
+            System.out.print("Enter quantity received: ");
+            int qty = Integer.parseInt(sc.nextLine());
+
+            warehouse.receiveShipment(name, qty);
+        } catch (Exception e) {
+            System.err.println("Shipment receiving failed: " + e.getMessage());
         }
     }
 
@@ -158,6 +191,16 @@ public class RetailSales {
         } else {
             System.out.println("\n--- Sales Ledger ---");
             ledger.forEach(System.out::println);
+        }
+    }
+
+    public static void viewWarehouseInventory() {
+        var inv = warehouse.getInventory();
+        if (inv.isEmpty()) {
+            System.out.println("Warehouse inventory is empty.");
+        } else {
+            System.out.println("\n--- Warehouse Inventory ---");
+            inv.forEach((item, qty) -> System.out.println(item + ": " + qty));
         }
     }
 }
