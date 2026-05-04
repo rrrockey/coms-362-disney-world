@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * CLI flow for assigning guests to ride queues.
- * Implements the "Assign Guest to Ride Queue" use case.
+ * CLI flow for managing ride queues.
+ * Implements the "Manage Ride Queue" use case with options to view, add, and remove guests.
  *
  * @author ryanrockey
  */
@@ -49,19 +49,6 @@ public class ManageRideQueues {
             }
             System.out.println();
 
-            // ── Get guest ID ──────────────────────────────────────────────
-            System.out.print("  Enter guest ID: ");
-            int guestId = Integer.parseInt(sc.nextLine().trim());
-
-            // Alternate 3a: Guest not found
-            Guest guest = GuestRepository.findGuestById(guestId);
-            if (guest == null) {
-                System.out.println("  Guest not found.");
-                printDivider("");
-                pause();
-                return;
-            }
-
             // ── Select ride ───────────────────────────────────────────────
             System.out.print("  Select ride (1-" + operationalRides.size() + "): ");
             int rideChoice = Integer.parseInt(sc.nextLine().trim());
@@ -76,31 +63,8 @@ public class ManageRideQueues {
 
             Ride selectedRide = operationalRides.get(rideChoice - 1);
 
-            // ── Check if guest is already in a queue ──────────────────────
-            // Alternate 6a: Guest already in a queue
-            for (Ride r : RideRepository.loadAllRides()) {
-                if (r.isGuestInQueue(guestId)) {
-                    System.out.println("  Guest already in a queue for " + r.rideName + ".");
-                    printDivider("");
-                    pause();
-                    return;
-                }
-            }
-
-            // ── Add guest to ride queue ───────────────────────────────────
-            int position = selectedRide.addGuestToQueue(guestId);
-
-            // ── Update ride data ──────────────────────────────────────────
-            RideRepository.saveRide(selectedRide);
-
-            // ── Display confirmation ──────────────────────────────────────
-            printDivider("");
-            System.out.println("  ✓ Guest added to queue!\n");
-            System.out.printf("  Guest    : %s (ID %d)%n", guest.name, guest.guestId);
-            System.out.printf("  Ride     : %s%n", selectedRide.rideName);
-            System.out.printf("  Position : %d%n", position);
-            System.out.printf("  Wait Time: ~%d minutes%n", selectedRide.getEstimatedWaitMinutes());
-            printDivider("");
+            // ── Display ride queue management menu ─────────────────────────
+            showRideQueueMenu(selectedRide);
 
         } catch (NumberFormatException e) {
             System.out.println("\n  Invalid number entered - operation cancelled.");
@@ -113,6 +77,212 @@ public class ManageRideQueues {
             System.err.println("\n  Unexpected error: " + e.getMessage());
             printDivider("");
         }
+        pause();
+    }
+
+    /**
+     * Display the ride queue management submenu with options to view, add, or delete guests.
+     */
+    private static void showRideQueueMenu(Ride ride) throws IOException {
+        boolean done = false;
+
+        while (!done) {
+            System.out.println();
+            printDivider("QUEUE: " + ride.rideName);
+            System.out.println("  Queue Size: " + ride.queueSize + " guests");
+            System.out.println("  Est. Wait: ~" + ride.getEstimatedWaitMinutes() + " minutes\n");
+            System.out.println("  1. View queue");
+            System.out.println("  2. Add guest to queue");
+            System.out.println("  3. Remove guest from queue");
+            System.out.println("  4. Back to ride selection");
+            System.out.print("\n  Select option (1-4): ");
+
+            try {
+                int choice = Integer.parseInt(sc.nextLine().trim());
+
+                switch (choice) {
+                    case 1:
+                        viewRideQueue(ride);
+                        break;
+                    case 2:
+                        addGuestToQueue(ride);
+                        break;
+                    case 3:
+                        removeGuestFromQueue(ride);
+                        break;
+                    case 4:
+                        done = true;
+                        break;
+                    default:
+                        System.out.println("  Invalid selection. Please try again.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("  Invalid input. Please enter a number.");
+            }
+        }
+
+        printDivider("");
+    }
+
+    /**
+     * Display all guests currently in the ride queue.
+     * @throws IOException 
+     */
+    private static void viewRideQueue(Ride ride) throws IOException {
+        System.out.println();
+        printDivider("");
+
+        if (ride.queueSize == 0) {
+            System.out.println("  The queue is empty.");
+        } else {
+            System.out.println("  Queue for " + ride.rideName + ":\n");
+            System.out.printf("  %-2s  %-30s  %-8s%n", "Pos", "Guest Name", "Guest ID");
+            System.out.println("  " + "-".repeat(42));
+
+            // Assuming the Ride class has a way to retrieve guest IDs in order
+            List<Integer> queuedGuestIds = ride.getQueuedGuestIds();
+            for (int i = 0; i < queuedGuestIds.size(); i++) {
+                int guestId = queuedGuestIds.get(i);
+                Guest guest = GuestRepository.findGuestById(guestId);
+                if (guest != null) {
+                    System.out.printf("  %-2d  %-30s  %-8d%n",
+                            i + 1,
+                            truncate(guest.name, 30),
+                            guest.guestId);
+                }
+            }
+        }
+
+        printDivider("");
+        pause();
+    }
+
+    /**
+     * Add a guest to the ride queue.
+     */
+    private static void addGuestToQueue(Ride ride) throws IOException {
+        System.out.println();
+        printDivider("");
+
+        // ── Get guest ID ──────────────────────────────────────────────
+        System.out.print("  Enter guest ID: ");
+        int guestId = Integer.parseInt(sc.nextLine().trim());
+
+        // Alternate 3a: Guest not found
+        Guest guest = GuestRepository.findGuestById(guestId);
+        if (guest == null) {
+            System.out.println("  Guest not found.");
+            printDivider("");
+            pause();
+            return;
+        }
+
+        // ── Check if guest is already in a queue ──────────────────────
+        // Alternate 6a: Guest already in a queue
+        for (Ride r : RideRepository.loadAllRides()) {
+            if (r.isGuestInQueue(guestId)) {
+                System.out.println("  Guest already in a queue for " + r.rideName + ".");
+                printDivider("");
+                pause();
+                return;
+            }
+        }
+
+        // ── Add guest to ride queue ───────────────────────────────────
+        int position = ride.addGuestToQueue(guestId);
+
+        // ── Update ride data ──────────────────────────────────────────
+        RideRepository.saveRide(ride);
+
+        // ── Display confirmation ──────────────────────────────────────
+        printDivider("");
+        System.out.println("  ✓ Guest added to queue!\n");
+        System.out.printf("  Guest    : %s (ID %d)%n", guest.name, guest.guestId);
+        System.out.printf("  Ride     : %s%n", ride.rideName);
+        System.out.printf("  Position : %d%n", position);
+        System.out.printf("  Wait Time: ~%d minutes%n", ride.getEstimatedWaitMinutes());
+        printDivider("");
+        pause();
+    }
+
+    /**
+     * Remove a guest from the ride queue.
+     */
+    private static void removeGuestFromQueue(Ride ride) throws IOException {
+        System.out.println();
+        printDivider("");
+
+        if (ride.queueSize == 0) {
+            System.out.println("  The queue is empty. Cannot remove guests.");
+            printDivider("");
+            pause();
+            return;
+        }
+
+        // ── Display current queue ─────────────────────────────────────
+        System.out.println("  Current queue:\n");
+        System.out.printf("  %-2s  %-30s  %-8s%n", "Pos", "Guest Name", "Guest ID");
+        System.out.println("  " + "-".repeat(42));
+
+        List<Integer> queuedGuestIds = ride.getQueuedGuestIds();
+        for (int i = 0; i < queuedGuestIds.size(); i++) {
+            int guestId = queuedGuestIds.get(i);
+            Guest guest = GuestRepository.findGuestById(guestId);
+            if (guest != null) {
+                System.out.printf("  %-2d  %-30s  %-8d%n",
+                        i + 1,
+                        truncate(guest.name, 30),
+                        guest.guestId);
+            }
+        }
+
+        System.out.println();
+
+        // ── Get guest ID to remove ────────────────────────────────────
+        System.out.print("  Enter guest ID to remove: ");
+        int guestId = Integer.parseInt(sc.nextLine().trim());
+
+        // ── Check if guest is in this queue ───────────────────────────
+        if (!ride.isGuestInQueue(guestId)) {
+            System.out.println("  Guest is not in this queue.");
+            printDivider("");
+            pause();
+            return;
+        }
+
+        // ── Get guest info for confirmation ───────────────────────────
+        Guest guest = GuestRepository.findGuestById(guestId);
+        if (guest == null) {
+            System.out.println("  Guest not found.");
+            printDivider("");
+            pause();
+            return;
+        }
+
+        // ── Confirm removal ───────────────────────────────────────────
+        System.out.printf("  Remove %s (ID %d) from queue? (y/n): ", guest.name, guest.guestId);
+        String confirmation = sc.nextLine().trim().toLowerCase();
+
+        if (!confirmation.equals("y") && !confirmation.equals("yes")) {
+            System.out.println("  Removal cancelled.");
+            printDivider("");
+            pause();
+            return;
+        }
+
+        // ── Remove guest from queue ───────────────────────────────────
+        ride.removeGuestFromQueue(guestId);
+
+        // ── Update ride data ──────────────────────────────────────────
+        RideRepository.saveRide(ride);
+
+        // ── Display confirmation ──────────────────────────────────────
+        printDivider("");
+        System.out.println("  ✓ Guest removed from queue!\n");
+        System.out.printf("  Guest    : %s (ID %d)%n", guest.name, guest.guestId);
+        System.out.printf("  Ride     : %s%n", ride.rideName);
+        System.out.printf("  New Queue Size: %d%n", ride.queueSize);
+        printDivider("");
         pause();
     }
 
