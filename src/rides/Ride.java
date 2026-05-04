@@ -1,5 +1,7 @@
 package rides;
 
+import java.util.List;
+
 /**
  * Represents a theme park ride with queue management.
  * Tracks queue position, wait times, and operational status.
@@ -66,6 +68,42 @@ public class Ride {
         System.arraycopy(guestQueue, 1, guestQueue, 0, queueSize - 1);
         queueSize--;
         return nextGuest;
+    }
+
+    /**
+     * Removes a specific guest from the queue by guest ID.
+     * Shifts remaining guests forward to maintain order.
+     */
+    public void removeGuestFromQueue(int guestId) {
+        int indexToRemove = -1;
+        
+        // Find the guest in the queue
+        for (int i = 0; i < queueSize; i++) {
+            if (guestQueue[i] == guestId) {
+                indexToRemove = i;
+                break;
+            }
+        }
+        
+        // If guest not found, do nothing
+        if (indexToRemove == -1) {
+            return;
+        }
+        
+        // Shift remaining guests forward
+        System.arraycopy(guestQueue, indexToRemove + 1, guestQueue, indexToRemove, queueSize - indexToRemove - 1);
+        queueSize--;
+    }
+
+    /**
+     * Returns a list of all guest IDs currently in the queue in order.
+     */
+    public List<Integer> getQueuedGuestIds() {
+        List<Integer> ids = new java.util.ArrayList<>();
+        for (int i = 0; i < queueSize; i++) {
+            ids.add(guestQueue[i]);
+        }
+        return ids;
     }
 
     /**
