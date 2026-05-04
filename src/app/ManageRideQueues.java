@@ -23,48 +23,62 @@ public class ManageRideQueues {
         System.out.println();
         printDivider("MANAGE RIDE QUEUE");
 
+        boolean exit = false;
+
         try {
-            // ── Load operational rides ────────────────────────────────────
-            List<Ride> operationalRides = RideRepository.loadOperationalRides();
+            while (!exit) {
+                // ── Load operational rides ────────────────────────────────────
+                List<Ride> operationalRides = RideRepository.loadOperationalRides();
 
-            // Precondition 0a: Check if any rides are available
-            if (operationalRides.isEmpty()) {
-                System.out.println("  No rides available at this time.");
-                printDivider("");
-                pause();
-                return;
+                // Precondition 0a: Check if any rides are available
+                if (operationalRides.isEmpty()) {
+                    System.out.println("  No rides available at this time.");
+                    printDivider("");
+                    pause();
+                    return;
+                }
+
+                // ── Display available rides ───────────────────────────────────
+                System.out.println("  Available Rides:\n");
+                System.out.printf("  %-2s  %-20s  %-8s  %-10s%n", "ID", "Ride Name", "Queue", "Wait (min)");
+                System.out.println("  " + "-".repeat(45));
+                for (int i = 0; i < operationalRides.size(); i++) {
+                    Ride r = operationalRides.get(i);
+                    System.out.printf("  %-2d  %-20s  %-8d  %-10d%n",
+                            i + 1,
+                            truncate(r.rideName, 20),
+                            r.queueSize,
+                            r.getEstimatedWaitMinutes());
+                }
+                System.out.println();
+                System.out.println("  0. Exit to main menu");
+                System.out.println();
+
+                // ── Select ride ───────────────────────────────────────────────
+                System.out.print("  Select ride (0-" + operationalRides.size() + "): ");
+                int rideChoice = Integer.parseInt(sc.nextLine().trim());
+
+                // Check if user wants to exit
+                if (rideChoice == 0) {
+                    exit = true;
+                    return;
+                }
+
+                // Alternate 5a: Invalid ride selection
+                if (rideChoice < 1 || rideChoice > operationalRides.size()) {
+                    System.out.println("  Invalid selection.");
+                    printDivider("");
+                    pause();
+                    continue;
+                }
+
+                Ride selectedRide = operationalRides.get(rideChoice - 1);
+
+                // ── Display ride queue management menu ─────────────────────────
+                showRideQueueMenu(selectedRide);
             }
 
-            // ── Display available rides ───────────────────────────────────
-            System.out.println("  Available Rides:\n");
-            System.out.printf("  %-2s  %-20s  %-8s  %-10s%n", "ID", "Ride Name", "Queue", "Wait (min)");
-            System.out.println("  " + "-".repeat(45));
-            for (int i = 0; i < operationalRides.size(); i++) {
-                Ride r = operationalRides.get(i);
-                System.out.printf("  %-2d  %-20s  %-8d  %-10d%n",
-                        i + 1,
-                        truncate(r.rideName, 20),
-                        r.queueSize,
-                        r.getEstimatedWaitMinutes());
-            }
-            System.out.println();
-
-            // ── Select ride ───────────────────────────────────────────────
-            System.out.print("  Select ride (1-" + operationalRides.size() + "): ");
-            int rideChoice = Integer.parseInt(sc.nextLine().trim());
-
-            // Alternate 5a: Invalid ride selection
-            if (rideChoice < 1 || rideChoice > operationalRides.size()) {
-                System.out.println("  Invalid selection.");
-                printDivider("");
-                pause();
-                return;
-            }
-
-            Ride selectedRide = operationalRides.get(rideChoice - 1);
-
-            // ── Display ride queue management menu ─────────────────────────
-            showRideQueueMenu(selectedRide);
+            printDivider("");
 
         } catch (NumberFormatException e) {
             System.out.println("\n  Invalid number entered - operation cancelled.");
