@@ -1,4 +1,3 @@
-
 package app;
 
 import guest.*;
@@ -19,8 +18,7 @@ import java.util.Scanner;
  */
 public class DisneyWorld {
 
-
-    private static final Scanner sc = new Scanner(System.in); 
+    public static final Scanner sc = new Scanner(System.in); 
     
     public static void main(String[] args) {
         printBanner();
@@ -43,7 +41,7 @@ public class DisneyWorld {
         	
         	System.out.print("\nEnter a command [0-7]: ");
 
-	        String command = sc.next().trim();
+	        String command = sc.nextLine().trim();
 	        switch (command) {
 	            case "1" -> {
 		            	CheckInGuests.checkInGuests();
@@ -58,9 +56,9 @@ public class DisneyWorld {
 		            	printMenu();
 	            }
 	            case "4" -> {
-                    ManageDining.manageDining();
-                    printMenu();
-                }
+		            	ManageDining.manageDining();
+		            	printMenu();
+	            }
 	            case "5" -> {
 		            	ManageHotels.manageHotels();
 		            	printMenu();

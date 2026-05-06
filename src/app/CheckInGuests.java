@@ -10,7 +10,7 @@ import java.util.Scanner;
  */
 public class CheckInGuests {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = app.DisneyWorld.sc;
 
     public static void checkInGuests() {
         System.out.println();

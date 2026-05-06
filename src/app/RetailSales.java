@@ -13,7 +13,7 @@ import retailsales.RetailWarehouse;
 import retailsales.Transaction;
 
 public class RetailSales {
-    private static final Scanner sc = new Scanner(System.in); 
+    private static final Scanner sc = app.DisneyWorld.sc; 
     private static final RetailSalesRegister register = new RetailSalesRegister();
     private static final RetailSalesEmployee employee = new RetailSalesEmployee();
     private static final RetailWarehouse warehouse = new RetailWarehouse();
@@ -30,9 +30,9 @@ public class RetailSales {
             inventory.add(new RetailItem("MagicBand+", 45.0, 5, 15));
 
             // Initial warehouse stock
-            warehouse.receiveShipment("Mickey Ears", 50);
-            warehouse.receiveShipment("Disney Pin", 200);
-            warehouse.receiveShipment("MagicBand+", 30);
+            warehouse.receiveShipment("Mickey Ears", 50, true);
+            warehouse.receiveShipment("Disney Pin", 200, true);
+            warehouse.receiveShipment("MagicBand+", 30, true);
         }
     }
 

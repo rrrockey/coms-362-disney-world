@@ -11,7 +11,7 @@ import parkevents.entities.Play;
 
 public class ManageParkEvents {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = app.DisneyWorld.sc;
 
     public static void manageParkEvents() {
         boolean running = true;
