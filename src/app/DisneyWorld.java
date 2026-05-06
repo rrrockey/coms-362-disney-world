@@ -7,6 +7,9 @@ import retailsales.*;
 import rides.RideRepository;
 import employee.*;
 import hotel.*;
+import employee.EmployeeRepository;
+import employee.ShiftRepository;
+import employee.ManagerRepository;
 
 
 import java.util.ArrayList;
@@ -33,13 +36,17 @@ public class DisneyWorld {
             EventRepository.initialise();
             RideRepository.initialise();
             RetailSales.initInventory();
+			EmployeeRepository.initialise();
+			ShiftRepository.initialise();
+			ManagerRepository.initialise();
+
         } catch (Exception e) {
             System.err.println("Failed to initialise data directory: " + e.getMessage());
             return;
         }
         while (running) {
         	
-        	System.out.print("\nEnter a command [0-7]: ");
+        	System.out.print("\nEnter a command [0-8]: ");
 
 	        String command = sc.nextLine().trim();
 	        switch (command) {
@@ -71,8 +78,12 @@ public class DisneyWorld {
                     ManageRideQueues.manageRideQueues();
                     printMenu();
                 }
+				case "8" -> {
+					ManageEmployeeScheduling.manageEmployeeScheduling();
+					printMenu();
+				}
 	            case "0" -> {System.out.println("Goodbye!"); running = false;}
-	            default  -> System.out.println("Invalid command. Please enter 0-6.");
+	            default  -> System.out.println("Invalid command. Please enter 0-8.");
 
 	        }
         }
@@ -112,6 +123,7 @@ public class DisneyWorld {
           + " | 5) Manage Hotels                                 |\n"
           + " | 6) Manage Park Events                            |\n"
           + " | 7) Manage Ride Queue                             |\n"
+		  + " | 8) Manage Employee Scheduling                    |\n"
           + " | 0) Exit                                          |\n"
           + " |                                                  |\n"
           + " +--------------------------------------------------+\n");
