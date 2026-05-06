@@ -1,6 +1,9 @@
 package app;
 
 import  dining.*;
+import dining.strategy.AddNewMenuItemStrategy;
+import dining.strategy.InventoryUpdateStrategy;
+import dining.strategy.RestockExistingItemStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +12,7 @@ import java.util.Scanner;
 
 public class ManageDining {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = app.DisneyWorld.sc;
 
     private static final String MENU_FILE = "data/menu.csv";
     private static final String ORDER_FILE = "data/orders.csv";
@@ -330,9 +333,9 @@ public class ManageDining {
         System.out.print("  Enter item name to update: ");
         String itemName = sc.nextLine().trim();
 
-        boolean newItem = false;
+        boolean itemExists = inventory.containsItem(itemName);
 
-        if (!inventory.containsItem(itemName)) {
+        if (!itemExists) {
             System.out.println("  Item not found in inventory.");
             System.out.print("  Would you like to add it? (y/n): ");
             String addChoice = sc.nextLine().trim().toLowerCase();
@@ -341,37 +344,43 @@ public class ManageDining {
                 System.out.println("  Inventory update cancelled.");
                 return;
             }
-
-            newItem = true;
         }
 
-        System.out.print("  Enter quantity to add, or press Enter to add default stock of 20: ");
+        System.out.print("  Enter quantity to add, or press Enter to add def stock of 20: ");
         String input = sc.nextLine().trim();
 
-        int amountToAdd;
+        int quantity;
 
         if (input.isEmpty()) {
-            amountToAdd = 20;
-        } else {
+            quantity = 20;
+        }
+        else {
             try {
-                amountToAdd = Integer.parseInt(input);
+                quantity = Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("  Invalid quantity. Please enter a valid whole number.");
+                System.out.println("  Invalid quantity. Please enter a whole number.");
                 return;
             }
         }
 
-        if (amountToAdd <= 0) {
-            System.out.println("  Invalid quantity. Quantity must be greater than zero.");
+        if (quantity <= 0) {
+            System.out.println(" Invalid quantity. Quantity must be greater than zero.");
             return;
         }
 
-        if (newItem) {
+        String description = "";
+        double price = 0.0;
+
+        InventoryUpdateStrategy strategy;
+
+        if (itemExists) {
+            strategy = new RestockExistingItemStrategy();
+        }
+        else {
             System.out.print("  Enter item description: ");
-            String description = sc.nextLine().trim();
+            description = sc.nextLine().trim();
 
             System.out.print("  Enter item price: ");
-            double price;
 
             try {
                 price = Double.parseDouble(sc.nextLine().trim());
@@ -385,18 +394,12 @@ public class ManageDining {
                 return;
             }
 
-            MenuItem newMenuItem = new MenuItem(
-                    service.getServiceType(),
-                    itemName,
-                    description,
-                    price
-            );
-
-            service.addMenuItem(newMenuItem);
-            service.saveMenuToCSV(MENU_FILE);
+            strategy = new AddNewMenuItemStrategy();
         }
 
-        inventory.addQuantity(itemName, amountToAdd);
+        strategy.update(service, inventory, itemName, quantity, description, price);
+
+        service.saveMenuToCSV(MENU_FILE);
         inventory.saveStockToCSV(INVENTORY_FILE);
 
         System.out.println("  Inventory item updated successfully.");

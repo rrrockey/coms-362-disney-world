@@ -20,9 +20,11 @@ import java.util.Scanner;
  */
 public class ManageRideQueues {
 
-    private static final Scanner sc = new Scanner(System.in);
+
+	private static final Scanner sc = DisneyWorld.sc;
     private static QueueStatisticsObserver statisticsObserver;
     private static QueueAuditObserver auditObserver;
+
 
     public static void manageRideQueues() {
         System.out.println();

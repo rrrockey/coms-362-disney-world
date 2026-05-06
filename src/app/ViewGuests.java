@@ -20,7 +20,7 @@ import guest.GuestRepository;
  */
 public class ViewGuests {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = DisneyWorld.sc;
 
     // ------------------------------------------------------------------ //
     //  Entry point
