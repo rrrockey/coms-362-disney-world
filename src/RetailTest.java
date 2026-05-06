@@ -1,5 +1,6 @@
 import guest.Guest;
 import retailsales.*;
+import retailsales.command.*;
 import employee.RetailSalesEmployee;
 
 public class RetailTest {
@@ -70,5 +71,38 @@ public class RetailTest {
         Guest nonMember = new Guest(3, "Goofy", 40, "1-Day", 100.0, 0.0, false);
         register.processMembershipDiscountPurchase(employee, nonMember, mug, "Cash");
         System.out.println(nonMember);
+
+        // ---------------------------------------------------------------
+        // Command Pattern validation — same operations via RetailCommand
+        // ---------------------------------------------------------------
+        System.out.println("\n========== Command Pattern Tests ==========");
+
+        Guest cmdGuest = new Guest(10, "CmdGuest", 25, "Annual Pass", 100.0, 50.0, true);
+        RetailItem cmdItem = new RetailItem("MagicBand+", 45.0, 5, 10);
+
+        // C1. PurchaseCommand (cash)
+        System.out.println("\n[C1] PurchaseCommand (Cash):");
+        register.executeCommand(new PurchaseCommand(register, cmdGuest, cmdItem, "Cash"));
+        System.out.println(cmdGuest);
+        System.out.println("Stock: " + cmdItem.stock);
+
+        // C2. MembershipDiscountPurchaseCommand (gift credit)
+        System.out.println("\n[C2] MembershipDiscountPurchaseCommand (Gift Credit):");
+        register.executeCommand(new MembershipDiscountPurchaseCommand(
+                register, employee, cmdGuest, cmdItem, "Gift Credit"));
+        System.out.println(cmdGuest);
+        System.out.println("Stock: " + cmdItem.stock);
+
+        // C3. ReturnCommand — return the first command-based transaction
+        System.out.println("\n[C3] ReturnCommand (Cash refund):");
+        Transaction cmdTx = register.getSalesLedger().get(register.getSalesLedger().size() - 2);
+        register.executeCommand(new ReturnCommand(register, cmdGuest, cmdTx, "Cash"));
+        System.out.println(cmdGuest);
+        System.out.println("Stock: " + cmdItem.stock);
+
+        // C4. RestockCommand
+        System.out.println("\n[C4] RestockCommand (+3 units):");
+        register.executeCommand(new RestockCommand(employee, cmdItem, 3));
+        System.out.println("Stock: " + cmdItem.stock);
     }
 }

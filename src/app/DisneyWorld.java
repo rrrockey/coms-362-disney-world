@@ -5,6 +5,7 @@ import guest.*;
 import parkevents.EventRepository;
 import parkevents.ManageParkEvents;
 import retailsales.*;
+import retailsales.command.*;
 import employee.*;
 import hotel.*;
 
@@ -147,13 +148,16 @@ public class DisneyWorld {
                 System.out.print("Apply membership discount (10% off)? (y/n): ");
                 boolean applyDiscount = sc.nextLine().trim().equalsIgnoreCase("y");
                 if (applyDiscount) {
-                    register.processMembershipDiscountPurchase(employee, guest, item, paymentType);
+                    RetailCommand cmd = new MembershipDiscountPurchaseCommand(
+                            register, employee, guest, item, paymentType);
+                    register.executeCommand(cmd);
                     GuestRepository.saveGuest(guest);
                     return;
                 }
             }
 
-            register.processPurchase(guest, item, paymentType);
+            RetailCommand cmd = new PurchaseCommand(register, guest, item, paymentType);
+            register.executeCommand(cmd);
             GuestRepository.saveGuest(guest); // Persist updated guest funds
         } catch (Exception e) {
             System.err.println("Purchase failed: " + e.getMessage());
@@ -186,7 +190,8 @@ public class DisneyWorld {
             System.out.print("Refund Type (Cash/Gift Card Credit): ");
             String refundType = sc.nextLine().trim();
 
-            register.processReturn(guest, tx, refundType);
+            RetailCommand cmd = new ReturnCommand(register, guest, tx, refundType);
+            register.executeCommand(cmd);
             GuestRepository.saveGuest(guest); // Persist updated guest funds
         } catch (Exception e) {
             System.err.println("Return failed: " + e.getMessage());
@@ -206,7 +211,8 @@ public class DisneyWorld {
             System.out.print("Enter quantity to restock: ");
             int qty = Integer.parseInt(sc.nextLine());
 
-            employee.restockItem(item, qty);
+            RetailCommand cmd = new RestockCommand(employee, item, qty);
+            register.executeCommand(cmd);
         } catch (Exception e) {
             System.err.println("Restock failed: " + e.getMessage());
         }

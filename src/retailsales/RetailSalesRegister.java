@@ -2,6 +2,7 @@ package retailsales;
 
 import guest.Guest;
 import employee.RetailSalesEmployee;
+import retailsales.command.RetailCommand;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,5 +125,15 @@ public class RetailSalesRegister {
 
     public List<Transaction> getSalesLedger() {
         return salesLedger;
+    }
+
+    /**
+     * Invoker method: executes any {@link RetailCommand}.
+     * Decouples the caller from the specific operation being performed.
+     *
+     * @param cmd the command to execute
+     */
+    public void executeCommand(RetailCommand cmd) {
+        cmd.execute();
     }
 }
