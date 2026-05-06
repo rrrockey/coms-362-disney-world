@@ -15,8 +15,14 @@ public class RetailWarehouse {
      * @param quantity Quantity received
      */
     public void receiveShipment(String itemName, int quantity) {
+        receiveShipment(itemName, quantity, false);
+    }
+
+    public void receiveShipment(String itemName, int quantity, boolean silent) {
         inventory.put(itemName, inventory.getOrDefault(itemName, 0) + quantity);
-        System.out.println("Warehouse received shipment: " + quantity + " units of " + itemName + ".");
+        if (!silent) {
+            System.out.println("Warehouse received shipment: " + quantity + " units of " + itemName + ".");
+        }
     }
 
     /**

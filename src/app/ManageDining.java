@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 public class ManageDining {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = app.DisneyWorld.sc;
 
     private static final String MENU_FILE = "data/menu.csv";
     private static final String ORDER_FILE = "data/orders.csv";

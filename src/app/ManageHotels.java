@@ -27,7 +27,7 @@ import java.util.Scanner;
  */
 public class ManageHotels {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = DisneyWorld.sc;
 
     private static final HotelEmployee FRONT_DESK  =
             new HotelEmployee(1, "Staff", "Front Desk");
