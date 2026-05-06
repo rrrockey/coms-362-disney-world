@@ -17,7 +17,7 @@ import java.util.Scanner;
  */
 public class ManageRideQueues {
 
-    private static final Scanner sc = new Scanner(System.in);
+    private static final Scanner sc = DisneyWorld.sc;
 
     public static void manageRideQueues() {
         System.out.println();
