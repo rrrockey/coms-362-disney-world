@@ -2,8 +2,10 @@ package employee;
 
 import guest.Guest;
 import retailsales.RetailItem;
+import retailsales.RetailWarehouse;
 
 public class RetailSalesEmployee extends Employee {
+    public String name = "Default Employee";
 
     /**
      * Verifies whether the given guest holds a valid membership.
@@ -31,5 +33,16 @@ public class RetailSalesEmployee extends Employee {
             item.stock = item.capacity;
             System.out.println("Restocked " + canStock + " items. Display full. Leftover: " + leftover);
         }
+    }
+
+    /**
+     * Requests a restock from the central warehouse.
+     * @param warehouse The warehouse to request from
+     * @param item The item to restock
+     * @param quantity The requested quantity
+     */
+    public void requestWarehouseRestock(RetailWarehouse warehouse, RetailItem item, int quantity) {
+        System.out.println("Employee " + this.name + " requesting " + quantity + " units of " + item.name + " from warehouse.");
+        warehouse.fulfillRestockRequest(item, quantity);
     }
 }
