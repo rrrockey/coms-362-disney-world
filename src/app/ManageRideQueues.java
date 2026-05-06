@@ -37,6 +37,7 @@ public class ManageRideQueues {
             while (!exit) {
                 // ── Load operational rides ────────────────────────────────────
                 List<Ride> operationalRides = RideRepository.loadOperationalRides();
+                attachObservers(operationalRides);
 
                 // Precondition 0a: Check if any rides are available
                 if (operationalRides.isEmpty()) {
@@ -335,6 +336,13 @@ public class ManageRideQueues {
         System.out.printf("  New Queue Size: %d%n", ride.queueSize);
         printDivider("");
         pause();
+    }
+    
+    private static void attachObservers(List<Ride> rides) {
+        for (Ride ride : rides) {
+            ride.addObserver(statisticsObserver);
+            ride.addObserver(auditObserver);
+        }
     }
 
     /**
