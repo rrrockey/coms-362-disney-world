@@ -35,3 +35,6 @@ data/
 
 # VSCode
 .vscode/
+
+# Codex
+.codex

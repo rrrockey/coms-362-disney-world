@@ -4,6 +4,8 @@ import guest.Guest;
 import guest.GuestRepository;
 import rides.Ride;
 import rides.RideRepository;
+import rides.QueueStatisticsObserver;
+import rides.QueueAuditObserver;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,12 +14,17 @@ import java.util.Scanner;
 /**
  * CLI flow for managing ride queues.
  * Implements the "Manage Ride Queue" use case with options to view, add, and remove guests.
+ * Uses the Observer pattern to decouple queue operations from their side effects.
  *
  * @author ryanrockey
  */
 public class ManageRideQueues {
 
-    private static final Scanner sc = DisneyWorld.sc;
+
+	private static final Scanner sc = DisneyWorld.sc;
+    private static QueueStatisticsObserver statisticsObserver;
+    private static QueueAuditObserver auditObserver;
+
 
     public static void manageRideQueues() {
         System.out.println();
@@ -26,9 +33,13 @@ public class ManageRideQueues {
         boolean exit = false;
 
         try {
+            // ── Initialize observers ──────────────────────────────────
+            initializeObservers();
+
             while (!exit) {
                 // ── Load operational rides ────────────────────────────────────
                 List<Ride> operationalRides = RideRepository.loadOperationalRides();
+                attachObservers(operationalRides);
 
                 // Precondition 0a: Check if any rides are available
                 if (operationalRides.isEmpty()) {
@@ -95,6 +106,25 @@ public class ManageRideQueues {
     }
 
     /**
+     * Initializes observers and attaches them to all rides.
+     */
+    private static void initializeObservers() throws IOException {
+        statisticsObserver = new QueueStatisticsObserver();
+        auditObserver = new QueueAuditObserver();
+        QueueAuditObserver.initialize();
+
+        // Attach observers to all rides for monitoring
+        try {
+            for (Ride ride : RideRepository.loadAllRides()) {
+                ride.addObserver(statisticsObserver);
+                ride.addObserver(auditObserver);
+            }
+        } catch (IOException e) {
+            System.err.println("Warning: Could not initialize observers on all rides");
+        }
+    }
+
+    /**
      * Display the ride queue management submenu with options to view, add, or delete guests.
      */
     private static void showRideQueueMenu(Ride ride) throws IOException {
@@ -108,8 +138,10 @@ public class ManageRideQueues {
             System.out.println("  1. View queue");
             System.out.println("  2. Add guest to queue");
             System.out.println("  3. Remove guest from queue");
-            System.out.println("  4. Back to ride selection");
-            System.out.print("\n  Select option (1-4): ");
+            System.out.println("  4. View queue statistics");
+            System.out.println("  5. View audit log");
+            System.out.println("  6. Back to ride selection");
+            System.out.print("\n  Select option (1-6): ");
 
             try {
                 int choice = Integer.parseInt(sc.nextLine().trim());
@@ -125,6 +157,12 @@ public class ManageRideQueues {
                         removeGuestFromQueue(ride);
                         break;
                     case 4:
+                        viewStatistics();
+                        break;
+                    case 5:
+                        viewAuditLog();
+                        break;
+                    case 6:
                         done = true;
                         break;
                     default:
@@ -140,7 +178,6 @@ public class ManageRideQueues {
 
     /**
      * Display all guests currently in the ride queue.
-     * @throws IOException 
      */
     private static void viewRideQueue(Ride ride) throws IOException {
         System.out.println();
@@ -153,7 +190,6 @@ public class ManageRideQueues {
             System.out.printf("  %-2s  %-30s  %-8s%n", "Pos", "Guest Name", "Guest ID");
             System.out.println("  " + "-".repeat(42));
 
-            // Assuming the Ride class has a way to retrieve guest IDs in order
             List<Integer> queuedGuestIds = ride.getQueuedGuestIds();
             for (int i = 0; i < queuedGuestIds.size(); i++) {
                 int guestId = queuedGuestIds.get(i);
@@ -173,6 +209,7 @@ public class ManageRideQueues {
 
     /**
      * Add a guest to the ride queue.
+     * The Ride class notifies observers automatically upon successful addition.
      */
     private static void addGuestToQueue(Ride ride) throws IOException {
         System.out.println();
@@ -203,6 +240,7 @@ public class ManageRideQueues {
         }
 
         // ── Add guest to ride queue ───────────────────────────────────
+        // The Ride automatically notifies observers via addGuestToQueue()
         int position = ride.addGuestToQueue(guestId);
 
         // ── Update ride data ──────────────────────────────────────────
@@ -221,6 +259,7 @@ public class ManageRideQueues {
 
     /**
      * Remove a guest from the ride queue.
+     * The Ride class notifies observers automatically upon successful removal.
      */
     private static void removeGuestFromQueue(Ride ride) throws IOException {
         System.out.println();
@@ -285,6 +324,7 @@ public class ManageRideQueues {
         }
 
         // ── Remove guest from queue ───────────────────────────────────
+        // The Ride automatically notifies observers via removeGuestFromQueue()
         ride.removeGuestFromQueue(guestId);
 
         // ── Update ride data ──────────────────────────────────────────
@@ -296,6 +336,35 @@ public class ManageRideQueues {
         System.out.printf("  Guest    : %s (ID %d)%n", guest.name, guest.guestId);
         System.out.printf("  Ride     : %s%n", ride.rideName);
         System.out.printf("  New Queue Size: %d%n", ride.queueSize);
+        printDivider("");
+        pause();
+    }
+    
+    private static void attachObservers(List<Ride> rides) {
+        for (Ride ride : rides) {
+            ride.addObserver(statisticsObserver);
+            ride.addObserver(auditObserver);
+        }
+    }
+
+    /**
+     * Display queue statistics collected by the statistics observer.
+     */
+    private static void viewStatistics() {
+        System.out.println();
+        printDivider("");
+        statisticsObserver.printAllStatistics();
+        printDivider("");
+        pause();
+    }
+
+    /**
+     * Display the audit log collected by the audit observer.
+     */
+    private static void viewAuditLog() throws IOException {
+        System.out.println();
+        printDivider("");
+        QueueAuditObserver.printAuditLog();
         printDivider("");
         pause();
     }

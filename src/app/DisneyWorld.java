@@ -82,7 +82,11 @@ public class DisneyWorld {
 					ManageEmployeeScheduling.manageEmployeeScheduling();
 					printMenu();
 				}
-	            case "0" -> {System.out.println("Goodbye!"); running = false;}
+	            case "0" -> {
+	            		System.out.println("Goodbye!"); 
+	            		running = false;
+	            		sc.close();
+        		}
 	            default  -> System.out.println("Invalid command. Please enter 0-8.");
 
 	        }
